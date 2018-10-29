@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/home/arturogarcia/Programacion/maestria/javaprojects/mobigrid/libs/BESA3-ALPHA1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/home/arturogarcia/Programacion/maestria/javaprojects/mobigrid/libs/BESA3%20-%20JavaDoc.zip!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
