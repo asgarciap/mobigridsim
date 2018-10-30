@@ -11,6 +11,6 @@ import java.util.List;
  */
 public class ExecutorState extends StateBESA {
 
-    public ExecutorState() {
+    public ExecutorState(int id) {
     }
 }

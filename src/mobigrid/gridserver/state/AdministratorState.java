@@ -55,28 +55,34 @@ public class AdministratorState extends StateBESA {
     }
 
     public JobDescription getNextJobToAdd() {
-        long currentTime = System.currentTimeMillis()*1000;
+        long currentTime = System.currentTimeMillis()/1000;
 
         if(currentTime - StartTime >= 0 && TotalJobs == 0) {
             TotalJobs++;
-            return new JobDescription("Job1", 1000f,4000f,500f);
+            JobDescription j = new JobDescription("Job1", 1000f,4000f,200f);
+            j.addInputFile("File1", 2000f);
+            return j;
         }
 
         if(currentTime - StartTime >= 10 && TotalJobs == 1) {
             TotalJobs++;
-            return new JobDescription("Job2",200f,4000f,500f);
+            return new JobDescription("Job2",200f,3000f,100f);
         }
 
-        if(currentTime - StartTime >= 20 && TotalJobs == 2) {
+        if(currentTime - StartTime >= 15 && TotalJobs == 2) {
             TotalJobs++;
-            return new JobDescription("Job3",2000f,4000f,500f);
+            return new JobDescription("Job3",2000f,1000f,50f);
         }
 
-        if(currentTime - StartTime >= 30 && TotalJobs >= 3 && TotalJobs <= 22) {
+        if(currentTime - StartTime >= 20 && TotalJobs >= 3 && TotalJobs <= 22) {
             TotalJobs++;
             return new JobDescription("Job"+TotalJobs,1500f,4000f,500f);
         }
 
         return null;
+    }
+
+    public int getTotalNodes() {
+        return TotalNodes;
     }
 }

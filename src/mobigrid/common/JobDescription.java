@@ -24,6 +24,7 @@ public class JobDescription extends DataBESA {
         RequiredRam = requiredRam;
         ComputationalTime = computationalTime;
         InputFilesSize = new HashMap<>();
+        addInputFile(Name, ProgramFileSize);
     }
 
     public void addInputFile(String name, float size) {

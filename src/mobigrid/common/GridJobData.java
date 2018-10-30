@@ -6,10 +6,13 @@ public class GridJobData extends DataBESA {
 
     private String DataId;
     private float DataSize;
+    private int NodeId;
+    private boolean Downloaded;
 
     public GridJobData(String dataId, float dataSize) {
         DataId = dataId;
         DataSize = dataSize;
+        Downloaded = false;
     }
 
     public String getDataId() {
@@ -26,5 +29,21 @@ public class GridJobData extends DataBESA {
 
     public void setDataSize(float dataSize) {
         DataSize = dataSize;
+    }
+
+    public void setNodeId(int nodeId) {
+        NodeId = nodeId;
+    }
+
+    public int getNodeId() {
+        return NodeId;
+    }
+
+    public void setDownloaded(boolean downloaded) {
+        Downloaded = downloaded;
+    }
+
+    public boolean isDownloaded() {
+        return Downloaded;
     }
 }

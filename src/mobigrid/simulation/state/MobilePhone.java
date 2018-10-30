@@ -3,6 +3,7 @@ package mobigrid.simulation.state;
 import mobigrid.common.MobileNodeDescription;
 import mobigrid.common.NodeStateEnum;
 
+import javax.xml.crypto.Data;
 import java.util.Map;
 import java.util.Set;
 
@@ -88,6 +89,14 @@ public class MobilePhone {
 
     public Set<String> getBuffersIds() {
         return DataBuffers.keySet();
+    }
+
+    public boolean isDataDownloaded(String dataId) {
+        for(Map.Entry<String, Float> buffer : DataBuffers.entrySet()) {
+            if (buffer.getKey().equals(dataId))
+                return true;
+        }
+        return false;
     }
 
     public void installProgram(Program program) throws Exception {

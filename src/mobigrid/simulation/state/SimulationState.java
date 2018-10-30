@@ -3,6 +3,8 @@ package mobigrid.simulation.state;
 import BESA.Kernell.Agent.StateBESA;
 import mobigrid.common.MobileNodeDescription;
 import mobigrid.dashboard.state.SimulationDashboard;
+import mobigrid.mobilephone.SupervisorAgent;
+import mobigrid.mobilephone.state.SupervisorState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,5 +45,13 @@ public class SimulationState extends StateBESA {
             }
         }
         return r;
+    }
+
+    public MobilePhone getMobilePhoneById(int id) {
+        for(MobilePhone phone : MobilePhones) {
+            if(phone.getPhoneId() == id)
+                return phone;
+        }
+        return null;
     }
 }

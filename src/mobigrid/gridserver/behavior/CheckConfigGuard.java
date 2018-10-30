@@ -45,22 +45,22 @@ public class CheckConfigGuard extends PeriodicGuardBESA {
             md = as.getNextNodeToAdd();
         }
 
-        return;
-        /*
-        //now check if it is time to send a new job the grid simulation
-        JobDescription j = as.getNextJobToAdd();
+        if(as.getTotalNodes() >= 4) {
+            //now check if it is time to send a new job the grid simulation
+            JobDescription j = as.getNextJobToAdd();
 
-        while(j != null) {
-            //this is pretty much the same as the mobile node.
-            EventBESA event = new EventBESA(AddJobGuard.class.getName(), j);
-            try {
-                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DISPATCHER.toString());
-                ah.sendEvent(event);
-            }catch(ExceptionBESA ex) {
-                ReportBESA.error(ex);
+            while (j != null) {
+                //this is pretty much the same as the mobile node.
+                EventBESA event = new EventBESA(AddJobGuard.class.getName(), j);
+                try {
+                    ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DISPATCHER.toString());
+                    ah.sendEvent(event);
+                } catch (ExceptionBESA ex) {
+                    ReportBESA.error(ex);
+                }
+
+                j = as.getNextJobToAdd();
             }
-
-            j = as.getNextJobToAdd();
-        }*/
+        }
     }
 }
