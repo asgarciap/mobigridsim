@@ -5,10 +5,7 @@ import BESA.Kernell.Agent.Event.EventBESA;
 import BESA.Kernell.Agent.GuardBESA;
 import BESA.Kernell.System.Directory.AgHandlerBESA;
 import BESA.Log.ReportBESA;
-import mobigrid.common.AgentNames;
-import mobigrid.common.GridJobStateEnum;
-import mobigrid.common.JobDescription;
-import mobigrid.common.MobileNodeDescription;
+import mobigrid.common.*;
 import mobigrid.dashboard.behavior.UpdateNodesStatusGuard;
 import mobigrid.simulation.state.ProcessSimulationState;
 import mobigrid.simulation.state.SimulationState;
@@ -32,8 +29,10 @@ public class ProcessSimulateExecuteProgramGuard extends GuardBESA {
 
         AgHandlerBESA ah;
 
+        AssignedJob assignedJob = new AssignedJob(processSimulationState.getPhoneId(), jobDescription);
+
         //now we need no notify the dashboard than a new mobile node had been added
-        EventBESA event = new EventBESA(ExecuteProgramSimulatedGuard.class.getName(), jobDescription);
+        EventBESA event = new EventBESA(ExecuteProgramSimulatedGuard.class.getName(), assignedJob);
         try {
             //get the dashboard agent handler
             ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SIMULATION.toString());

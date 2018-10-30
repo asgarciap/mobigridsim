@@ -37,5 +37,19 @@ public class SimulateExecuteProgramGuard extends GuardBESA {
         } catch (ExceptionBESA ex) {
             ReportBESA.error(ex);
         }
+
+        //Update Node Status in the dashboard
+        MobileNodeDescription node = se.getMobileNodeStatus(assignedJob.getNodeId());
+
+        //now we need no notify the dashboard than a mobile node had been updated
+        EventBESA eventUpdate = new EventBESA(UpdateNodesStatusGuard.class.getName(), node);
+        try {
+            //get the dashboard agent handler
+            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DASHBOARD.toString());
+            //send to it the event
+            ah.sendEvent(eventUpdate);
+        } catch (ExceptionBESA ex) {
+            ReportBESA.error(ex);
+        }
     }
 }

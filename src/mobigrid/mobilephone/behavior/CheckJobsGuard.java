@@ -34,6 +34,7 @@ public class CheckJobsGuard extends PeriodicGuardBESA {
             for(Map.Entry<String,Float> item : queuedJob.getInputFiles().entrySet()) {
                 ss.addDownloadingFile(item.getKey());
                 GridJobData d = new GridJobData(item.getKey(), item.getValue());
+                d.setNodeId(ss.getNodeId());
                 EventBESA event = new EventBESA(DownloadDataGuard.class.getName(), d);
                 try {
                     ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DOWNLOADER.toString()+ss.getNodeId());
@@ -62,8 +63,10 @@ public class CheckJobsGuard extends PeriodicGuardBESA {
         while(downloadingJob != null) {
             if(ss.isJobReadyToRun(downloadingJob)) {
                 downloadingJob.setState(GridJobStateEnum.READY);
-                EventBESA event = new EventBESA(ExecuteJobGuard.class.getName(), downloadingJob);
                 try {
+                    AssignedJob assignedJob = new AssignedJob(ss.getNodeId(),downloadingJob);
+
+                    EventBESA event = new EventBESA(ExecuteJobGuard.class.getName(), assignedJob);
                     ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.EXECUTOR.toString()+ss.getNodeId());
 
                     //send the event
@@ -71,7 +74,6 @@ public class CheckJobsGuard extends PeriodicGuardBESA {
                     downloadingJob.setState(GridJobStateEnum.RUNNING);
 
                     //send event to the main supervisor
-                    AssignedJob assignedJob = new AssignedJob(ss.getNodeId(),downloadingJob);
                     EventBESA eventSup = new EventBESA(ReportJobStatusGuard.class.getName(),assignedJob);
                     ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
                     ah.sendEvent(eventSup);

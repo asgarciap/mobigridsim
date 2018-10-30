@@ -5,6 +5,8 @@ import BESA.Kernell.Agent.StateBESA;
 import BESA.Log.ReportBESA;
 import mobigrid.common.JobDescription;
 
+import java.util.Map;
+
 /**
  * @author arturogarcia
  */
@@ -18,6 +20,12 @@ public class ProcessSimulationState extends StateBESA {
 
     public boolean executeJob(JobDescription jobDescription) {
         Program program = new Program(jobDescription.getName(), jobDescription.getProgramFileSize(), (int) jobDescription.getComputationalTime());
+
+        //Assign input files references to the program instance
+        for(Map.Entry<String, Float> inputFile : jobDescription.getInputFiles().entrySet()) {
+            program.addInputData(inputFile.getKey(), inputFile.getValue());
+        }
+
         try {
             MobilePhone.installProgram(program);
             MobilePhone.executeProgram(program.getName());

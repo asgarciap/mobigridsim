@@ -4,6 +4,9 @@ import mobigrid.common.MobileNodeDescription;
 import mobigrid.common.NodeStateEnum;
 
 import javax.xml.crypto.Data;
+import javax.xml.soap.Node;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,6 +25,8 @@ public class MobilePhone {
 
     public MobilePhone(MobileNodeDescription nodeFeatures) {
         NodeFeatures = nodeFeatures;
+        DataBuffers = new HashMap<>();
+        Programs = new HashMap<>();
     }
 
     public void setDischargeRates(float batteryDischargeRate, float diskIORate) {
@@ -57,22 +62,32 @@ public class MobilePhone {
     }
 
     public void downloadData(String dataId, float dataSize) throws Exception {
+
+        NodeFeatures.setState(NodeStateEnum.RECEIVING_DATA);
+        NodeFeatures.setRunningProcess(dataId);
+
         //Check if we have enough space to store the data
-        if(NodeFeatures.getAvailableDisk() < dataSize)
-            throw new Exception("There is no enough available Disk Space to allocate "+dataSize+" MB.");
+        if(NodeFeatures.getAvailableDisk() < dataSize) {
+            NodeFeatures.setState(NodeStateEnum.READY);
+            NodeFeatures.setRunningProcess("");
+            throw new Exception("There is no enough available Disk Space to allocate " + dataSize + " MB.");
+        }
 
         float dataDownloaded = 0.0f;
         while(dataDownloaded < dataSize) {
             dataDownloaded += NodeFeatures.getDiskIORate();
+            NodeFeatures.setBatteryLevel(NodeFeatures.getBatteryLevel()-NodeFeatures.getBatteryDischargeRate());
             sleep(1000);
         }
-        NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk()+dataDownloaded);
+        NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk()-dataDownloaded);
         DataBuffers.put(dataId, dataSize);
+        NodeFeatures.setState(NodeStateEnum.READY);
+        NodeFeatures.setRunningProcess("");
     }
 
     public void eraseDataById(String dataId) {
         if(DataBuffers.containsKey(dataId)) {
-            NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk()-DataBuffers.get(dataId));
+            NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk()+DataBuffers.get(dataId));
             DataBuffers.remove(dataId);
         }
     }
@@ -82,7 +97,7 @@ public class MobilePhone {
         for(Map.Entry<String, Float> buffer : DataBuffers.entrySet()) {
             bufferSize = buffer.getValue();
             DataBuffers.remove(buffer.getKey());
-            NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk()-bufferSize);
+            NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk()+bufferSize);
         }
         return bufferSize;
     }
@@ -102,6 +117,13 @@ public class MobilePhone {
     public void installProgram(Program program) throws Exception {
         if(!Programs.containsKey(program.getName())) {
             boolean installed = false;
+
+            //Check if the file is already downloaded
+            if(DataBuffers.containsKey(program.getName())) {
+                Programs.put(program.getName(), program);
+                installed = true;
+            }
+
             while(!installed) {
                 try {
                     downloadData(program.getName(), program.getSize());
@@ -118,6 +140,9 @@ public class MobilePhone {
     }
 
     public void executeProgram(String programId) {
+        NodeFeatures.setState(NodeStateEnum.RUNNING_JOB);
+        NodeFeatures.setRunningProcess(programId);
+
         if(Programs.containsKey(programId)) {
             for (String id : Programs.get(programId).getInputDataIds()) {
                 if(!DataBuffers.containsKey(id)) {
@@ -133,7 +158,10 @@ public class MobilePhone {
                 }
             }
             Programs.get(programId).execute();
+            NodeFeatures.setBatteryLevel(NodeFeatures.getBatteryLevel()-(NodeFeatures.getBatteryDischargeRate()*Programs.get(programId).getTotalExecutionTime()));
         }
+        NodeFeatures.setState(NodeStateEnum.READY);
+        NodeFeatures.setRunningProcess("");
     }
 
     public MobileNodeDescription getCurrentStatus() {

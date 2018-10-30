@@ -17,11 +17,12 @@ public class MobileNodeDescription extends DataBESA {
     private float AvailableRam;
     private float TotalDisk;
     private float AvailableDisk;
+    private String RunningProcess;
 
-    // Node discharge rates
+    // Node discharge rates (percentage/second)
     private float BatteryDischargeRate;
 
-    //Time to read/write data
+    //Time to read/write data (bytes/second)
     private float DiskIORate;
 
     public MobileNodeDescription(int id, float initialBattery, float initialRam, float initialDisk) {
@@ -32,10 +33,11 @@ public class MobileNodeDescription extends DataBESA {
         TotalDisk = initialDisk;
         AvailableDisk = initialDisk;
         State = NodeStateEnum.READY;
+        RunningProcess = "";
 
         //default discharge rates
-        BatteryDischargeRate = 0.01f;
-        DiskIORate = 0.02f;
+        BatteryDischargeRate = 0.3f; //percentaje/sec
+        DiskIORate = 50f; //bytes/sec
     }
 
     public MobileNodeDescription(MobileNodeDescription copy) {
@@ -105,5 +107,13 @@ public class MobileNodeDescription extends DataBESA {
 
     public float getBatteryDischargeRate() {
         return BatteryDischargeRate;
+    }
+
+    public String getRunningProcess() {
+        return RunningProcess;
+    }
+
+    public void setRunningProcess(String runningProcess) {
+        RunningProcess = runningProcess;
     }
 }

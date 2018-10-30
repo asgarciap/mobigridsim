@@ -15,6 +15,13 @@ public class GridJobData extends DataBESA {
         Downloaded = false;
     }
 
+    public GridJobData(GridJobData data) {
+        DataId = data.DataId;
+        DataSize = data.DataSize;
+        Downloaded = data.Downloaded;
+        NodeId = data.NodeId;
+    }
+
     public String getDataId() {
         return DataId;
     }

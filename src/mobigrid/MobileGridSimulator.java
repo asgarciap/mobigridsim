@@ -24,7 +24,7 @@ import mobigrid.gridserver.state.AdministratorState;
 import mobigrid.gridserver.state.DispatcherState;
 import mobigrid.gridserver.state.MainSupervisorState;
 import mobigrid.simulation.SimulationAgent;
-import mobigrid.simulation.behavior.AddMobileNodeGuard;
+import mobigrid.simulation.behavior.*;
 import mobigrid.simulation.state.SimulationState;
 
 import static java.lang.Thread.sleep;
@@ -44,6 +44,8 @@ public class MobileGridSimulator {
         SimulationState ss = new SimulationState();
         StructBESA simStruct = new StructBESA();
         simStruct.addBehavior("AddMobileBehaviorSim");
+        simStruct.addBehavior("SimulateDownloadBehavior");
+        simStruct.addBehavior("SimulateExecuteProgramBehavior");
 
         //Dashboard Agent
         SimulationDashboard sd = new SimulationDashboard();
@@ -67,6 +69,10 @@ public class MobileGridSimulator {
 
         try {
             simStruct.bindGuard("AddMobileBehaviorSim", AddMobileNodeGuard.class);
+            simStruct.bindGuard("SimulateDownloadBehavior", SimulateDownloadDataGuard.class);
+            simStruct.bindGuard("SimulateDownloadBehavior", DownloadDataSimulatedGuard.class);
+            simStruct.bindGuard("SimulateExecuteProgramBehavior", SimulateExecuteProgramGuard.class);
+            simStruct.bindGuard("SimulateExecuteProgramBehavior", ExecuteProgramSimulatedGuard.class);
             SimulationAgent simAgent = new SimulationAgent(AgentNames.SIMULATION.toString(), ss, simStruct, 0.91);
             simAgent.start();
 

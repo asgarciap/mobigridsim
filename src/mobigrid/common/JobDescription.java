@@ -17,6 +17,8 @@ public class JobDescription extends DataBESA {
     private float ProgramFileSize;
     private float RequiredRam;
     private float ComputationalTime;
+    private float StartTime;
+    private float FinishTime;
 
     public JobDescription(String name, float programFileSize, float requiredRam, float computationalTime) {
         Name = name;

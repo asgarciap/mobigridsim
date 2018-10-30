@@ -37,16 +37,16 @@ public class AdministratorState extends StateBESA {
             TotalNodes++;
             return new MobileNodeDescription(1,100, 4000, 200000);
         }
-        if(currentTime - StartTime >= 10 && TotalNodes == 1) {
+        if(currentTime - StartTime >= 5 && TotalNodes == 1) {
             TotalNodes++;
             return new MobileNodeDescription(2,80, 2000, 100000);
         }
-        if(currentTime - StartTime >= 15 && TotalNodes == 2) {
+        if(currentTime - StartTime >= 6 && TotalNodes == 2) {
             TotalNodes++;
             return new MobileNodeDescription(3,90, 4000, 100000);
         }
 
-        if(currentTime - StartTime >= 30 && TotalNodes == 3) {
+        if(currentTime - StartTime >= 8 && TotalNodes == 3) {
             TotalNodes++;
             return new MobileNodeDescription(4,70, 3000, 200000);
         }
@@ -57,26 +57,26 @@ public class AdministratorState extends StateBESA {
     public JobDescription getNextJobToAdd() {
         long currentTime = System.currentTimeMillis()/1000;
 
-        if(currentTime - StartTime >= 0 && TotalJobs == 0) {
+        if(currentTime - StartTime >= 10 && TotalJobs == 0) {
             TotalJobs++;
-            JobDescription j = new JobDescription("Job1", 1000f,4000f,200f);
-            j.addInputFile("File1", 2000f);
+            JobDescription j = new JobDescription("Job1", 500f,4000f,10f);
+            j.addInputFile("File1", 200f);
             return j;
         }
 
-        if(currentTime - StartTime >= 10 && TotalJobs == 1) {
+        if(currentTime - StartTime >= 40 && TotalJobs == 1) {
             TotalJobs++;
-            return new JobDescription("Job2",200f,3000f,100f);
+            return new JobDescription("Job2",200f,3000f,12f);
         }
 
-        if(currentTime - StartTime >= 15 && TotalJobs == 2) {
+        if(currentTime - StartTime >= 43 && TotalJobs == 2) {
             TotalJobs++;
-            return new JobDescription("Job3",2000f,1000f,50f);
+            return new JobDescription("Job3",450f,1000f,8f);
         }
 
-        if(currentTime - StartTime >= 20 && TotalJobs >= 3 && TotalJobs <= 22) {
+        if(currentTime - StartTime >= 45 && TotalJobs >= 3 && TotalJobs <= 22) {
             TotalJobs++;
-            return new JobDescription("Job"+TotalJobs,1500f,4000f,500f);
+            return new JobDescription("Job"+TotalJobs,600f,4000f,15f);
         }
 
         return null;

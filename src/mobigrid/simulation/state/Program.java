@@ -3,6 +3,7 @@ package mobigrid.simulation.state;
 import mobigrid.common.MobileNodeDescription;
 import mobigrid.common.NodeStateEnum;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,6 +24,7 @@ public class Program {
         Name = name;
         Size = size;
         TotalExecutionTime = totalExecutionTime;
+        InputData = new HashMap<>();
     }
 
     public void addInputData(String dataId, float dataSize) {

@@ -8,6 +8,8 @@ import BESA.Log.ReportBESA;
 import mobigrid.common.AgentNames;
 import mobigrid.common.AssignedJob;
 import mobigrid.common.GridJobData;
+import mobigrid.common.MobileNodeDescription;
+import mobigrid.dashboard.behavior.UpdateNodesStatusGuard;
 import mobigrid.simulation.state.SimulationState;
 
 /**
@@ -32,6 +34,20 @@ public class SimulateDownloadDataGuard extends GuardBESA {
             ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.PROCESS_SIMULATION.toString()+gridJobData.getNodeId());
             //send to it the event
             ah.sendEvent(event);
+        } catch (ExceptionBESA ex) {
+            ReportBESA.error(ex);
+        }
+
+        //Update Node Status in the dashboard
+        MobileNodeDescription node = se.getMobileNodeStatus(gridJobData.getNodeId());
+
+        //now we need no notify the dashboard than a mobile node had been updated
+        EventBESA eventUpdate = new EventBESA(UpdateNodesStatusGuard.class.getName(), node);
+        try {
+            //get the dashboard agent handler
+            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DASHBOARD.toString());
+            //send to it the event
+            ah.sendEvent(eventUpdate);
         } catch (ExceptionBESA ex) {
             ReportBESA.error(ex);
         }

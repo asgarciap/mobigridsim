@@ -23,7 +23,7 @@ public class MobileNodeTableModel extends AbstractTableModel {
     }
 
     public int getColumnCount() {
-        return 7;
+        return 8;
     }
 
     public String getColumnName(int column) {
@@ -36,18 +36,21 @@ public class MobileNodeTableModel extends AbstractTableModel {
                 name = "State";
                 break;
             case 2:
-                name = "Remain Battery Level (%)";
+                name = "Running Process";
                 break;
             case 3:
-                name = "Total RAM (KB)";
+                name = "Remain Battery Level (%)";
                 break;
             case 4:
-                name = "Available RAM (KB)";
+                name = "Total RAM (KB)";
                 break;
             case 5:
-                name = "Total Disk (MB)";
+                name = "Available RAM (KB)";
                 break;
             case 6:
+                name = "Total Disk (MB)";
+                break;
+            case 7:
                 name = "Available Disk (MB)";
                 break;
         }
@@ -63,7 +66,9 @@ public class MobileNodeTableModel extends AbstractTableModel {
             case 1:
                 type = NodeStateEnum.class;
                 break;
-
+            case 2:
+                type = String.class;
+                break;
         }
         return type;
     }
@@ -79,18 +84,21 @@ public class MobileNodeTableModel extends AbstractTableModel {
                 value = node.getState();
                 break;
             case 2:
-                value = node.getBatteryLevel();
+                value = node.getRunningProcess();
                 break;
             case 3:
-                value = node.getTotalRam();
+                value = node.getBatteryLevel();
                 break;
             case 4:
-                value = node.getAvailableRam();
+                value = node.getTotalRam();
                 break;
             case 5:
-                value = node.getTotalDisk();
+                value = node.getAvailableRam();
                 break;
             case 6:
+                value = node.getTotalDisk();
+                break;
+            case 7:
                 value = node.getAvailableDisk();
                 break;
         }
