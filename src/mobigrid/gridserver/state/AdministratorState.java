@@ -4,7 +4,11 @@ import BESA.Kernell.Agent.StateBESA;
 import mobigrid.common.JobDescription;
 import mobigrid.common.MobileNodeDescription;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 /**
  * Administrator Agent State.
@@ -16,73 +20,106 @@ import java.util.List;
  */
 public class AdministratorState extends StateBESA {
 
-    private String ConfigFileName;
-    private long StartTime;
+    private String NodesListFile;
+    private String JobsListFile;
+    private long SimulationTime; //Seconds
     private int TotalNodes;
     private int TotalJobs;
 
-    public AdministratorState(String configFileName) {
-        StartTime = System.currentTimeMillis()/1000;
-        ConfigFileName = configFileName;
+    public AdministratorState(String nodesListFile, String jobListFile) {
+        SimulationTime = 0;
+        NodesListFile = nodesListFile;
+        JobsListFile = jobListFile;
         TotalJobs = 0;
         TotalNodes = 0;
     }
 
-    // Returns next Mobile Node to add into the simulator.
-    public MobileNodeDescription getNextNodeToAdd() {
-
-        long currentTime = System.currentTimeMillis()/1000;
-
-        if(currentTime - StartTime >= 0 && TotalNodes == 0) {
-            TotalNodes++;
-            return new MobileNodeDescription(1,100, 4000, 200000);
-        }
-        if(currentTime - StartTime >= 5 && TotalNodes == 1) {
-            TotalNodes++;
-            return new MobileNodeDescription(2,80, 2000, 100000);
-        }
-        if(currentTime - StartTime >= 6 && TotalNodes == 2) {
-            TotalNodes++;
-            return new MobileNodeDescription(3,90, 4000, 100000);
-        }
-
-        if(currentTime - StartTime >= 8 && TotalNodes == 3) {
-            TotalNodes++;
-            return new MobileNodeDescription(4,70, 3000, 200000);
-        }
-
-        return null;
+    //Advance simulation time by one second
+    public void advanceSimulationTime() {
+        SimulationTime++;
     }
 
-    public JobDescription getNextJobToAdd() {
-        long currentTime = System.currentTimeMillis()/1000;
+    public long getSimulationTime() {
+        return SimulationTime;
+    }
 
-        if(currentTime - StartTime >= 10 && TotalJobs == 0) {
-            TotalJobs++;
-            JobDescription j = new JobDescription("Job1", 500f,4000f,10f);
-            j.addInputFile("File1", 200f);
-            return j;
+    // Returns next Mobile Node List to add into the simulation
+    public List<MobileNodeDescription> getNextNodesToAdd() {
+
+        List<MobileNodeDescription> nodes = new ArrayList<>();
+        try {
+            //Opens config file and check if its time to add the mobile node into the simulation
+            Scanner scanner = new Scanner(new File(NodesListFile));
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+
+                //ignore comments
+                if(line.startsWith("#")) continue;
+
+                String[] nd = line.split(",");
+
+                //ignore lines with wrong parameters
+                if(nd.length != 7) continue;
+
+                if(Integer.parseInt(nd[5]) == SimulationTime) {
+                    MobileNodeDescription n = new MobileNodeDescription(
+                            Integer.parseInt(nd[0]), //id
+                            Float.parseFloat(nd[1]), //initialBatteryLevel
+                            Float.parseFloat(nd[2]), //RAM (MB)
+                            Float.parseFloat(nd[3]) // Disk Space (MB)
+                    );
+
+                    n.setDischargeRates(Float.parseFloat(nd[4]), 50f);
+
+                    nodes.add(n);
+                    TotalNodes++;
+                }
+            }
+        }catch(FileNotFoundException ex) {
+            //TODO Log Error
         }
+        return nodes;
+    }
 
-        if(currentTime - StartTime >= 40 && TotalJobs == 1) {
-            TotalJobs++;
-            return new JobDescription("Job2",200f,3000f,12f);
+    public List<JobDescription> getNextJobsToAdd() {
+        List<JobDescription> jobs = new ArrayList<>();
+        try {
+            //Opens config file and check if its time to add the job into the simulation
+            Scanner scanner = new Scanner(new File(JobsListFile));
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+
+                //ignore comments
+                if(line.startsWith("#")) continue;
+
+                String[] jb = line.split(",");
+
+                //ignore lines with wrong parameters
+                if(jb.length != 5) continue;
+
+                if(Integer.parseInt(jb[4]) == SimulationTime) {
+                    JobDescription j = new JobDescription(
+                            jb[0], //job id
+                            Float.parseFloat(jb[1]), //program file size
+                            Float.parseFloat(jb[2]), //Required RAM (MB)
+                            Float.parseFloat(jb[3]) //Computational Time (MB)
+                    );
+
+                    jobs.add(j);
+                    TotalJobs++;
+                }
+            }
+        }catch(FileNotFoundException ex) {
+            //TODO Log Error
         }
-
-        if(currentTime - StartTime >= 43 && TotalJobs == 2) {
-            TotalJobs++;
-            return new JobDescription("Job3",450f,1000f,8f);
-        }
-
-        if(currentTime - StartTime >= 45 && TotalJobs >= 3 && TotalJobs <= 22) {
-            TotalJobs++;
-            return new JobDescription("Job"+TotalJobs,600f,4000f,15f);
-        }
-
-        return null;
+        return jobs;
     }
 
     public int getTotalNodes() {
         return TotalNodes;
+    }
+
+    public int getTotalJobs() {
+        return TotalJobs;
     }
 }

@@ -53,7 +53,7 @@ public class MobileGridSimulator {
         dashboardStruct.addBehavior("DashboardBehavior");
 
         //Administrator Agent
-        AdministratorState as = new AdministratorState("./mobigridsim.conf");
+        AdministratorState as = new AdministratorState("./nodelist.csv", "./joblist.csv");
         StructBESA adminStruct = new StructBESA();
         adminStruct.addBehavior("AdminBehavior");
 

@@ -25,9 +25,11 @@ public class CheckConfigGuard extends PeriodicGuardBESA {
 
         AgHandlerBESA ah;
 
+        //simulation step (1 second)
+        as.advanceSimulationTime();
+
         //Check if it is time to add a new mobile node to the simulation
-        MobileNodeDescription md = as.getNextNodeToAdd();
-        while(md != null) {
+        for(MobileNodeDescription md : as.getNextNodesToAdd()) {
             //ok, it is time to add a new node...
             //create an event to send the data
             EventBESA event = new EventBESA(AddMobileNodeGuard.class.getName(), md);
@@ -40,16 +42,11 @@ public class CheckConfigGuard extends PeriodicGuardBESA {
             }catch(ExceptionBESA ex) {
                 ReportBESA.error(ex);
             }
-
-            //check if there is another mobile node to sent..
-            md = as.getNextNodeToAdd();
         }
 
-        if(as.getTotalNodes() >= 4) {
+        if(as.getTotalNodes() >= 1) {
             //now check if it is time to send a new job the grid simulation
-            JobDescription j = as.getNextJobToAdd();
-
-            while (j != null) {
+            for(JobDescription j : as.getNextJobsToAdd()) {
                 //this is pretty much the same as the mobile node.
                 EventBESA event = new EventBESA(AddJobGuard.class.getName(), j);
                 try {
@@ -58,8 +55,6 @@ public class CheckConfigGuard extends PeriodicGuardBESA {
                 } catch (ExceptionBESA ex) {
                     ReportBESA.error(ex);
                 }
-
-                j = as.getNextJobToAdd();
             }
         }
     }

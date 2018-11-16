@@ -1,0 +1,24 @@
+# JobList List File.
+# CSV File, each line is a job description to add into the simulator
+# Params are as follow:
+# JobId, Program File Size (MB), Required RAM (MB), Computational Time (seconds), InitSimulationTime (Seconds)
+Job1,100,500,3600,10
+Job2,200,200,300,10
+Job3,400,100,720,5
+Job4,100,80,1000,10
+Job5,200,100,500,11
+Job6,220,200,5,10
+Job7,110,200,1800,12
+Job8,200,400,50,12
+Job9,150,500,1800,12
+Job10,340,200,7200,12
+Job11,340,400,7200,11
+Job12,230,300,100,10
+Job13,140,200,10,10
+Job14,560,100,2,8
+Job15,780,300,10,7
+Job16,460,100,10,10
+Job17,670,100,15,10
+Job18,120,200,20,30
+Job19,180,400,30,60
+Job20,100,70,3600,120
