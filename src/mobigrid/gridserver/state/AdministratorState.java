@@ -81,6 +81,41 @@ public class AdministratorState extends StateBESA {
         return nodes;
     }
 
+    // Returns next Mobile Node List to remove from the simulation
+    public List<MobileNodeDescription> getNextNodesToRemove() {
+
+        List<MobileNodeDescription> nodes = new ArrayList<>();
+        try {
+            //Opens config file and check if its time to remove the mobile node into the simulation
+            Scanner scanner = new Scanner(new File(NodesListFile));
+            while(scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+
+                //ignore comments
+                if(line.startsWith("#")) continue;
+
+                String[] nd = line.split(",");
+
+                //ignore lines with wrong parameters
+                if(nd.length != 7) continue;
+
+                if(Integer.parseInt(nd[6]) == SimulationTime) {
+                    MobileNodeDescription n = new MobileNodeDescription(
+                            Integer.parseInt(nd[0]), //id
+                            Float.parseFloat(nd[1]), //initialBatteryLevel
+                            Float.parseFloat(nd[2]), //RAM (MB)
+                            Float.parseFloat(nd[3]) // Disk Space (MB)
+                    );
+                    nodes.add(n);
+                    TotalNodes--;
+                }
+            }
+        }catch(FileNotFoundException ex) {
+            //TODO Log Error
+        }
+        return nodes;
+    }
+
     public List<JobDescription> getNextJobsToAdd() {
         List<JobDescription> jobs = new ArrayList<>();
         try {

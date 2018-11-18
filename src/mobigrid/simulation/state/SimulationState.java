@@ -28,6 +28,17 @@ public class SimulationState extends StateBESA {
         MobilePhones.add(mp);
     }
 
+    public void removeMobileNode(MobileNodeDescription nodeDescription) {
+        List<MobilePhone> temp = new ArrayList<>();
+        for(MobilePhone mobilePhone : MobilePhones) {
+            if(mobilePhone.getPhoneId() != nodeDescription.getId()) {
+                temp.add(mobilePhone);
+            }
+        }
+        MobilePhones.clear();
+        MobilePhones = temp;
+    }
+
     public List<MobileNodeDescription> getMobileNodesStatus() {
         List<MobileNodeDescription> md = new ArrayList<>();
         for (MobilePhone mp : MobilePhones) {

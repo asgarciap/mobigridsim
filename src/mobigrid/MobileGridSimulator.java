@@ -17,9 +17,7 @@ import mobigrid.dashboard.state.SimulationDashboard;
 import mobigrid.gridserver.AdministratorAgent;
 import mobigrid.gridserver.DispatcherAgent;
 import mobigrid.gridserver.MainSupervisorAgent;
-import mobigrid.gridserver.behavior.AddJobGuard;
-import mobigrid.gridserver.behavior.CheckConfigGuard;
-import mobigrid.gridserver.behavior.ReportJobStatusGuard;
+import mobigrid.gridserver.behavior.*;
 import mobigrid.gridserver.state.AdministratorState;
 import mobigrid.gridserver.state.DispatcherState;
 import mobigrid.gridserver.state.MainSupervisorState;
@@ -63,9 +61,11 @@ public class MobileGridSimulator {
         supervisorStruct.addBehavior("UpdateJobStatusBehavior");
 
         //Dispatcher Agent
-        DispatcherState dispatcherState = new DispatcherState(4);
+        DispatcherState dispatcherState = new DispatcherState();
         StructBESA dispatcherStruct = new StructBESA();
-        dispatcherStruct.addBehavior("DispatcherBehavior");
+        dispatcherStruct.addBehavior("DispatcherJobBehavior");
+        dispatcherStruct.addBehavior("DispatcherNodeBehavior");
+        dispatcherStruct.addBehavior("DispatcherDispatchJobsBehavior");
 
         try {
             simStruct.bindGuard("AddMobileBehaviorSim", AddMobileNodeGuard.class);
@@ -89,7 +89,10 @@ public class MobileGridSimulator {
             MainSupervisorAgent mainSupervisorAgent = new MainSupervisorAgent(AgentNames.MAIN_SUPERVISOR.toString(), mss, supervisorStruct, 0.91);
             mainSupervisorAgent.start();
 
-            dispatcherStruct.bindGuard("DispatcherBehavior", AddJobGuard.class);
+            dispatcherStruct.bindGuard("DispatcherJobBehavior", AddJobGuard.class);
+            dispatcherStruct.bindGuard("DispatcherNodeBehavior", RegisterNodeGuard.class);
+            dispatcherStruct.bindGuard("DispatcherNodeBehavior", UnregisterNodeGuard.class);
+            dispatcherStruct.bindGuard("DispatcherDispatchJobsBehavior", DispatchJobsGuard.class);
             DispatcherAgent dispatcherAgent = new DispatcherAgent(AgentNames.DISPATCHER.toString(), dispatcherState, dispatcherStruct, 0.91);
             dispatcherAgent.start();
 
@@ -98,6 +101,12 @@ public class MobileGridSimulator {
             EventBESA checkConfigEvent = new EventBESA(CheckConfigGuard.class.getName(), data);
             AgHandlerBESA ah = admLocal.getHandlerByAlias(AgentNames.ADMINISTRATOR.toString());
             ah.sendEvent(checkConfigEvent);
+
+            //Send another periodic event to check if we need to dispatch jobs in the dispatcher
+            PeriodicDataBESA dataDispatch = new PeriodicDataBESA(1000, 100, PeriodicGuardBESA.START_PERIODIC_CALL);
+            EventBESA dispatchJobsEvent = new EventBESA(DispatchJobsGuard.class.getName(), dataDispatch);
+            AgHandlerBESA ahd = admLocal.getHandlerByAlias(AgentNames.DISPATCHER.toString());
+            ahd.sendEvent(dispatchJobsEvent);
         }
         catch(ExceptionBESA e) {
             ReportBESA.fatal(e);

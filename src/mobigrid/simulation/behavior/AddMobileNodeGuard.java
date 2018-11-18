@@ -11,6 +11,7 @@ import BESA.Util.PeriodicDataBESA;
 import mobigrid.common.AgentNames;
 import mobigrid.common.MobileNodeDescription;
 import mobigrid.dashboard.behavior.UpdateNodesStatusGuard;
+import mobigrid.gridserver.behavior.RegisterNodeGuard;
 import mobigrid.mobilephone.DownloaderAgent;
 import mobigrid.mobilephone.ExecutorAgent;
 import mobigrid.mobilephone.SupervisorAgent;
@@ -114,5 +115,17 @@ public class AddMobileNodeGuard extends GuardBESA {
         }catch(ExceptionBESA ex) {
             ReportBESA.error(ex);
         }
+
+        //now we need no notify the dispatcher than a new mobile node had been added
+        EventBESA eventDispatcher = new EventBESA(RegisterNodeGuard.class.getName(), node);
+        try {
+            //get the dispatcher agent handler
+            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DISPATCHER.toString());
+            //send to it the event
+            ah.sendEvent(eventDispatcher);
+        } catch (ExceptionBESA ex) {
+            ReportBESA.error(ex);
+        }
+
     }
 }

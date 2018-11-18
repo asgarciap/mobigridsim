@@ -26,25 +26,10 @@ public class AddJobGuard extends GuardBESA {
     public void funcExecGuard(EventBESA eventBESA) {
         //Get the agent state
         DispatcherState dispatcherState = (DispatcherState) this.getAgent().getState();
+            AgHandlerBESA ah;
 
-        AgHandlerBESA ah;
+            JobDescription jobDescription = (JobDescription) eventBESA.getData();
 
-        JobDescription jobDescription = (JobDescription) eventBESA.getData();
-
-        AssignedJob assignedJob = dispatcherState.dispatchJob(jobDescription);
-
-        EventBESA event = new EventBESA(DispatchJobGuard.class.getName(), jobDescription);
-        EventBESA eventStatus = new EventBESA(ReportJobStatusGuard.class.getName(), assignedJob);
-        try {
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SUPERVISOR.toString()+assignedJob.getNodeId());
-            //send the event.
-            ah.sendEvent(event);
-
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
-            //send the event
-            ah.sendEvent(eventStatus);
-        }catch(ExceptionBESA ex) {
-            ReportBESA.error(ex);
-        }
+            dispatcherState.queueJob(jobDescription);
     }
 }

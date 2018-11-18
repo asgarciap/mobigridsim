@@ -10,6 +10,7 @@ import mobigrid.common.JobDescription;
 import mobigrid.common.MobileNodeDescription;
 import mobigrid.gridserver.state.AdministratorState;
 import mobigrid.simulation.behavior.AddMobileNodeGuard;
+import mobigrid.simulation.behavior.RemoveMobileNodeGuard;
 
 /**
  * Periodic Guard to check simulator config and
@@ -38,6 +39,23 @@ public class CheckConfigGuard extends PeriodicGuardBESA {
                 ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SIMULATION.toString());
 
                 //send the event. this will result in a new mobile node created in the simulation.
+                ah.sendEvent(event);
+            }catch(ExceptionBESA ex) {
+                ReportBESA.error(ex);
+            }
+        }
+
+
+        //Check if it is time to remove an existing mobile node from the simulation
+        for(MobileNodeDescription md : as.getNextNodesToRemove()) {
+            //ok, it is time to remove a node...
+            //create an event to send the data
+            EventBESA event = new EventBESA(RemoveMobileNodeGuard.class.getName(), md);
+            try {
+                //get the handler of the simulation agent (there is only one of this)
+                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SIMULATION.toString());
+
+                //send the event.
                 ah.sendEvent(event);
             }catch(ExceptionBESA ex) {
                 ReportBESA.error(ex);
