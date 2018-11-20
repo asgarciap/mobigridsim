@@ -61,28 +61,33 @@ public class MobilePhone {
         return NodeFeatures.getAvailableDisk();
     }
 
-    public void downloadData(String dataId, float dataSize) throws Exception {
+    public boolean downloadData(String dataId, float dataSize) throws Exception {
 
-        NodeFeatures.setState(NodeStateEnum.RECEIVING_DATA);
-        NodeFeatures.setRunningProcess(dataId);
+        float dataDownloaded = 0f;
+        if(NodeFeatures.getState() != NodeStateEnum.DISCONNECTED) {
+            NodeFeatures.setState(NodeStateEnum.RECEIVING_DATA);
+            NodeFeatures.setRunningProcess(dataId);
 
-        //Check if we have enough space to store the data
-        if(NodeFeatures.getAvailableDisk() < dataSize) {
+            //Check if we have enough space to store the data
+            if (NodeFeatures.getAvailableDisk() < dataSize) {
+                NodeFeatures.setState(NodeStateEnum.READY);
+                NodeFeatures.setRunningProcess("");
+                throw new Exception("There is no enough available Disk Space to allocate " + dataSize + " MB.");
+            }
+
+            dataDownloaded = DataBuffers.getOrDefault("dataId",0.0f);
+            if(dataDownloaded >= dataSize)
+                return true;
+
+            dataDownloaded += NodeFeatures.getDiskIORate();
+            NodeFeatures.setBatteryLevel(NodeFeatures.getBatteryLevel() - NodeFeatures.getBatteryDischargeRate());
+
+            NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk() - dataDownloaded);
+            DataBuffers.put(dataId, dataDownloaded);
             NodeFeatures.setState(NodeStateEnum.READY);
             NodeFeatures.setRunningProcess("");
-            throw new Exception("There is no enough available Disk Space to allocate " + dataSize + " MB.");
         }
-
-        float dataDownloaded = 0.0f;
-        while(dataDownloaded < dataSize) {
-            dataDownloaded += NodeFeatures.getDiskIORate();
-            NodeFeatures.setBatteryLevel(NodeFeatures.getBatteryLevel()-NodeFeatures.getBatteryDischargeRate());
-            sleep(1000);
-        }
-        NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk()-dataDownloaded);
-        DataBuffers.put(dataId, dataSize);
-        NodeFeatures.setState(NodeStateEnum.READY);
-        NodeFeatures.setRunningProcess("");
+        return (dataDownloaded >= dataSize);
     }
 
     public void eraseDataById(String dataId) {
@@ -114,7 +119,7 @@ public class MobilePhone {
         return false;
     }
 
-    public void installProgram(Program program) throws Exception {
+    public boolean installProgram(Program program) throws Exception {
         if(!Programs.containsKey(program.getName())) {
             boolean installed = false;
 
@@ -124,44 +129,50 @@ public class MobilePhone {
                 installed = true;
             }
 
-            while(!installed) {
-                try {
-                    downloadData(program.getName(), program.getSize());
+            try {
+                if(downloadData(program.getName(), program.getSize())) {
                     Programs.put(program.getName(), program);
                     installed = true;
-                } catch (Exception ex) {
-                    if(program.getSize() > NodeFeatures.getTotalDisk())
-                        throw new Exception("The program can't be installed in the phone because there is no enough space to store it");
-
-                    eraseNextDataBuffer();
+                    return true;
+                }else {
+                    return false;
                 }
+            } catch (Exception ex) {
+                if(program.getSize() > NodeFeatures.getTotalDisk())
+                    throw new Exception("The program can't be installed in the phone because there is no enough space to store it");
+
+                eraseNextDataBuffer();
             }
         }
+        return true;
     }
 
-    public void executeProgram(String programId) {
-        NodeFeatures.setState(NodeStateEnum.RUNNING_JOB);
-        NodeFeatures.setRunningProcess(programId);
+    public boolean executeProgram(String programId) {
+        if(NodeFeatures.getState() != NodeStateEnum.DISCONNECTED) {
+            NodeFeatures.setState(NodeStateEnum.RUNNING_JOB);
+            NodeFeatures.setRunningProcess(programId);
 
-        if(Programs.containsKey(programId)) {
-            for (String id : Programs.get(programId).getInputDataIds()) {
-                if(!DataBuffers.containsKey(id)) {
-                    boolean downloaded = false;
-                    while (!downloaded) {
-                        try {
-                            downloadData(id, Programs.get(programId).getInputDataSize(id));
-                            downloaded = true;
-                        } catch (Exception ex) {
-                            eraseNextDataBuffer();
+            if (Programs.containsKey(programId)) {
+                for (String id : Programs.get(programId).getInputDataIds()) {
+                    if (!DataBuffers.containsKey(id)) {
+                        boolean downloaded = false;
+                        while (!downloaded) {
+                            try {
+                                downloadData(id, Programs.get(programId).getInputDataSize(id));
+                                downloaded = true;
+                            } catch (Exception ex) {
+                                eraseNextDataBuffer();
+                            }
                         }
                     }
                 }
+                NodeFeatures.setBatteryLevel(NodeFeatures.getBatteryLevel() - (NodeFeatures.getBatteryDischargeRate() * Programs.get(programId).getTotalExecutionTime()));
+                return Programs.get(programId).execute();
             }
-            Programs.get(programId).execute();
-            NodeFeatures.setBatteryLevel(NodeFeatures.getBatteryLevel()-(NodeFeatures.getBatteryDischargeRate()*Programs.get(programId).getTotalExecutionTime()));
+            NodeFeatures.setState(NodeStateEnum.READY);
+            NodeFeatures.setRunningProcess("");
         }
-        NodeFeatures.setState(NodeStateEnum.READY);
-        NodeFeatures.setRunningProcess("");
+        return false;
     }
 
     public MobileNodeDescription getCurrentStatus() {

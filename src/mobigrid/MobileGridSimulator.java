@@ -21,6 +21,14 @@ import mobigrid.gridserver.behavior.*;
 import mobigrid.gridserver.state.AdministratorState;
 import mobigrid.gridserver.state.DispatcherState;
 import mobigrid.gridserver.state.MainSupervisorState;
+import mobigrid.mobilephone.DownloaderAgent;
+import mobigrid.mobilephone.ExecutorAgent;
+import mobigrid.mobilephone.SupervisorAgent;
+import mobigrid.mobilephone.behavior.*;
+import mobigrid.mobilephone.state.DownloaderState;
+import mobigrid.mobilephone.state.ExecutorState;
+import mobigrid.mobilephone.state.SupervisorState;
+import mobigrid.simulation.ProcessSimulationAgent;
 import mobigrid.simulation.SimulationAgent;
 import mobigrid.simulation.behavior.*;
 import mobigrid.simulation.state.SimulationState;
@@ -42,8 +50,10 @@ public class MobileGridSimulator {
         SimulationState ss = new SimulationState();
         StructBESA simStruct = new StructBESA();
         simStruct.addBehavior("AddMobileBehaviorSim");
+        simStruct.addBehavior("RemoveMobileBehaviorSim");
         simStruct.addBehavior("SimulateDownloadBehavior");
         simStruct.addBehavior("SimulateExecuteProgramBehavior");
+        simStruct.addBehavior("ProcessSimulationBehavior");
 
         //Dashboard Agent
         SimulationDashboard sd = new SimulationDashboard();
@@ -69,12 +79,19 @@ public class MobileGridSimulator {
 
         try {
             simStruct.bindGuard("AddMobileBehaviorSim", AddMobileNodeGuard.class);
+            simStruct.bindGuard("RemoveMobileBehaviorSim", RemoveMobileNodeGuard.class);
             simStruct.bindGuard("SimulateDownloadBehavior", SimulateDownloadDataGuard.class);
             simStruct.bindGuard("SimulateDownloadBehavior", DownloadDataSimulatedGuard.class);
             simStruct.bindGuard("SimulateExecuteProgramBehavior", SimulateExecuteProgramGuard.class);
             simStruct.bindGuard("SimulateExecuteProgramBehavior", ExecuteProgramSimulatedGuard.class);
+            simStruct.bindGuard("ProcessSimulationBehavior", ProcessSimulationGuard.class);
             SimulationAgent simAgent = new SimulationAgent(AgentNames.SIMULATION.toString(), ss, simStruct, 0.91);
             simAgent.start();
+
+            PeriodicDataBESA dataProc = new PeriodicDataBESA(1000, 100, PeriodicGuardBESA.START_PERIODIC_CALL);
+            EventBESA processEvent = new EventBESA(ProcessSimulationGuard.class.getName(), dataProc);
+            AgHandlerBESA ah = admLocal.getHandlerByAlias(AgentNames.SIMULATION.toString());
+            ah.sendEvent(processEvent);
 
             dashboardStruct.bindGuard("DashboardBehavior", UpdateNodesStatusGuard.class);
             dashboardStruct.bindGuard("DashboardBehavior", UpdateJobStatusGuard.class);
@@ -99,8 +116,56 @@ public class MobileGridSimulator {
             //Now sends a periodic event to check configuration every 1 seconds
             PeriodicDataBESA data = new PeriodicDataBESA(1000, 100, PeriodicGuardBESA.START_PERIODIC_CALL);
             EventBESA checkConfigEvent = new EventBESA(CheckConfigGuard.class.getName(), data);
-            AgHandlerBESA ah = admLocal.getHandlerByAlias(AgentNames.ADMINISTRATOR.toString());
+            ah = admLocal.getHandlerByAlias(AgentNames.ADMINISTRATOR.toString());
             ah.sendEvent(checkConfigEvent);
+
+            DownloaderState downloaderState = new DownloaderState();
+            StructBESA downStruct = new StructBESA();
+            downStruct.addBehavior("DownloaderBehavior");
+
+            ExecutorState executorState = new ExecutorState();
+            StructBESA execStruct = new StructBESA();
+            execStruct.addBehavior("ExecutorBehavior");
+
+            SupervisorState supervisorState = new SupervisorState();
+            StructBESA supStruct = new StructBESA();
+            supStruct.addBehavior("SupervisorBehavior");
+            supStruct.addBehavior("SupervisorDownloaderBehavior");
+            supStruct.addBehavior("SupervisorExecutorBehavior");
+            supStruct.addBehavior("SupervisorCheckJobsBehavior");
+
+            StructBESA processStruct = new StructBESA();
+            processStruct.addBehavior("ProcessSimulationBehavior");
+
+            try {
+                //now we need to create agents related to this mobile node
+
+                //Downloader Agent
+                downStruct.bindGuard("DownloaderBehavior", DownloadDataGuard.class);
+                DownloaderAgent downloaderAgent = new DownloaderAgent(AgentNames.DOWNLOADER.toString(),downloaderState,downStruct,0.91);
+                downloaderAgent.start();
+
+                //Executor Agent
+                execStruct.bindGuard("ExecutorBehavior", ExecuteJobGuard.class);
+                ExecutorAgent executorAgent = new ExecutorAgent(AgentNames.EXECUTOR.toString(),executorState,execStruct,0.91);
+                executorAgent.start();
+
+                //Supervisor Agent
+                supStruct.bindGuard("SupervisorBehavior", DispatchJobGuard.class);
+                supStruct.bindGuard("SupervisorDownloaderBehavior", DataDownloadedGuard.class);
+                supStruct.bindGuard("SupervisorExecutorBehavior", JobExecutedGuard.class);
+                supStruct.bindGuard("SupervisorCheckJobsBehavior", CheckJobsGuard.class);
+                SupervisorAgent supervisorAgent = new SupervisorAgent(AgentNames.SUPERVISOR.toString(), supervisorState, supStruct, 0.91);
+                supervisorAgent.start();
+
+                //Now, start a periodic event in the supervisor agent.
+                PeriodicDataBESA dataPer = new PeriodicDataBESA(1000, 100, PeriodicGuardBESA.START_PERIODIC_CALL);
+                EventBESA checkJobsEvent = new EventBESA(CheckJobsGuard.class.getName(), dataPer);
+                ah = admLocal.getHandlerByAlias(AgentNames.SUPERVISOR.toString());
+                ah.sendEvent(checkJobsEvent);
+            }catch(ExceptionBESA ex) {
+                ReportBESA.error(ex);
+            }
 
             //Send another periodic event to check if we need to dispatch jobs in the dispatcher
             PeriodicDataBESA dataDispatch = new PeriodicDataBESA(1000, 100, PeriodicGuardBESA.START_PERIODIC_CALL);

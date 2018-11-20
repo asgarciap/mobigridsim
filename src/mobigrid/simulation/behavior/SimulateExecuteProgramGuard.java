@@ -27,16 +27,7 @@ public class SimulateExecuteProgramGuard extends GuardBESA {
 
         AgHandlerBESA ah;
 
-        //now we need no notify the dashboard than a new mobile node had been added
-        EventBESA event = new EventBESA(ProcessSimulateExecuteProgramGuard.class.getName(), assignedJob.getJobDescription());
-        try {
-            //get the dashboard agent handler
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.PROCESS_SIMULATION.toString()+assignedJob.getNodeId());
-            //send to it the event
-            ah.sendEvent(event);
-        } catch (ExceptionBESA ex) {
-            ReportBESA.error(ex);
-        }
+        se.addJob(assignedJob.getNodeId(), assignedJob);
 
         //Update Node Status in the dashboard
         MobileNodeDescription node = se.getMobileNodeStatus(assignedJob.getNodeId());

@@ -25,18 +25,9 @@ public class SimulateDownloadDataGuard extends GuardBESA {
         //Get MobileNode description
         GridJobData gridJobData = (GridJobData) eventBESA.getData();
 
-        AgHandlerBESA ah;
+        se.addDownload(gridJobData.getNodeId(), gridJobData.getDataId(), gridJobData.getDataSize());
 
-        //now we need no notify the dashboard than a new mobile node had been added
-        EventBESA event = new EventBESA(ProcessSimulateDownloadDataGuard.class.getName(), gridJobData);
-        try {
-            //get the dashboard agent handler
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.PROCESS_SIMULATION.toString()+gridJobData.getNodeId());
-            //send to it the event
-            ah.sendEvent(event);
-        } catch (ExceptionBESA ex) {
-            ReportBESA.error(ex);
-        }
+        AgHandlerBESA ah;
 
         //Update Node Status in the dashboard
         MobileNodeDescription node = se.getMobileNodeStatus(gridJobData.getNodeId());

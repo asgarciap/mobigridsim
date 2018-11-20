@@ -52,14 +52,19 @@ public class DispatcherState extends StateBESA {
     }
 
     public void unregisterMobileNode(MobileNodeDescription mobileNodeDescription) {
-        LinkedList<MobileNodeDescription> temp = new LinkedList<>();
-        MobileNodeDescription node = MobileNodes.remove();
-        while(node != null) {
-            if(node.getId() != mobileNodeDescription.getId())
-                temp.add(node);
-            node = MobileNodes.remove();
+        if(MobileNodes.size() > 0) {
+            LinkedList<MobileNodeDescription> temp = new LinkedList<>();
+            MobileNodeDescription node = MobileNodes.remove();
+            while (node != null) {
+
+                if (node.getId() != mobileNodeDescription.getId())
+                    temp.add(node);
+
+                if (MobileNodes.size() > 0)
+                    node = MobileNodes.remove();
+            }
+            MobileNodes = temp;
         }
-        MobileNodes = temp;
     }
 
     public void queueJob(JobDescription jobDescription) {

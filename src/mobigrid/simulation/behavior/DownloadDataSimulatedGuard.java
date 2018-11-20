@@ -32,7 +32,7 @@ public class DownloadDataSimulatedGuard extends GuardBESA {
 
         EventBESA event = new EventBESA(DataDownloadedGuard.class.getName(), gridJobData);
         try {
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SUPERVISOR.toString()+gridJobData.getNodeId());
+            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SUPERVISOR.toString());
             //send to it the event
             ah.sendEvent(event);
         } catch (ExceptionBESA ex) {

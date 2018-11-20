@@ -18,6 +18,7 @@ public class Program {
     private String Name;
     private float Size;
     private int TotalExecutionTime;
+    private int CurrentExecutionTime;
     private Map<String, Float> InputData;
 
     public Program(String name, float size, int totalExecutionTime) {
@@ -25,6 +26,7 @@ public class Program {
         Size = size;
         TotalExecutionTime = totalExecutionTime;
         InputData = new HashMap<>();
+        CurrentExecutionTime = 0;
     }
 
     public void addInputData(String dataId, float dataSize) {
@@ -53,13 +55,12 @@ public class Program {
         return 0;
     }
 
-    public void execute() {
-        try {
-            sleep(TotalExecutionTime * 1000);
+    public boolean execute() {
+        CurrentExecutionTime++;
+        if(CurrentExecutionTime >= TotalExecutionTime) {
+            CurrentExecutionTime = 0;
+            return true;
         }
-        catch(InterruptedException ex)
-        {
-            String m = ex.getMessage();
-        }
+        return false;
     }
 }

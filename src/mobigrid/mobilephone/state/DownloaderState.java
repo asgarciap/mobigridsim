@@ -7,6 +7,6 @@ import BESA.Kernell.Agent.StateBESA;
  */
 public class DownloaderState extends StateBESA {
 
-    public DownloaderState(int id) {
+    public DownloaderState() {
     }
 }

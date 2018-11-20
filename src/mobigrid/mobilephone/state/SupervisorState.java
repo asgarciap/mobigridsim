@@ -21,10 +21,9 @@ public class SupervisorState extends StateBESA {
     private List<JobDescription> JobList;
     private int NodeId;
 
-    public SupervisorState(int nodeId) {
+    public SupervisorState() {
         DownloadingFilesList = new ArrayList<>();
         JobList = new ArrayList<>();
-        NodeId = nodeId;
     }
 
     public int getNodeId() {

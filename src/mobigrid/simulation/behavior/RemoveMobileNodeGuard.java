@@ -40,6 +40,8 @@ public class RemoveMobileNodeGuard extends GuardBESA {
 
     @Override
     public void funcExecGuard(EventBESA eventBESA) {
+
+        ReportBESA.info("Removiendo nodo de la simulacion");
         //Get the agent state
         SimulationState se = (SimulationState) this.getAgent().getState();
 
@@ -53,7 +55,7 @@ public class RemoveMobileNodeGuard extends GuardBESA {
 
         node.setState(NodeStateEnum.DISCONNECTED);
 
-        //now we need no notify the dashboard than a new mobile node had been added
+        //now we need no notify the dashboard than a mobile node had been removed
         EventBESA event = new EventBESA(UpdateNodesStatusGuard.class.getName(), node);
         try {
             //get the dashboard agent handler
@@ -62,22 +64,6 @@ public class RemoveMobileNodeGuard extends GuardBESA {
             ah.sendEvent(event);
         } catch (ExceptionBESA ex) {
             ReportBESA.error(ex);
-        }
-
-        try {
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DOWNLOADER.toString()+node.getId());
-            ah.getAg().shutdownAgent();
-            getAgent().getAdmLocal().unregisterAgent(AgentNames.DOWNLOADER.toString() + node.getId());
-
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SUPERVISOR.toString()+node.getId());
-            ah.getAg().shutdownAgent();
-            getAgent().getAdmLocal().unregisterAgent(AgentNames.SUPERVISOR.toString() + node.getId());
-
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.EXECUTOR.toString()+node.getId());
-            ah.getAg().shutdownAgent();
-            getAgent().getAdmLocal().unregisterAgent(AgentNames.EXECUTOR.toString() + node.getId());
-        }catch(ExceptionBESA exb) {
-            ReportBESA.error(exb);
         }
 
         //now we need no notify the dispatcher than a new mobile node had been added

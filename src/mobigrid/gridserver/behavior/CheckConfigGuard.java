@@ -45,9 +45,10 @@ public class CheckConfigGuard extends PeriodicGuardBESA {
             }
         }
 
-
+        ReportBESA.info("Verificando si hay nodos para eliminar de la simulacion");
         //Check if it is time to remove an existing mobile node from the simulation
         for(MobileNodeDescription md : as.getNextNodesToRemove()) {
+            ReportBESA.info("Nodo con Id: "+md.getId()+" marcando para eliminarse en tiempo: "+as.getSimulationTime());
             //ok, it is time to remove a node...
             //create an event to send the data
             EventBESA event = new EventBESA(RemoveMobileNodeGuard.class.getName(), md);
