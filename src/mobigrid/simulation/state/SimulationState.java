@@ -36,7 +36,7 @@ public class SimulationState extends StateBESA {
     }
 
     public void addDownload(int nodeId, String dataId, float dataSize) {
-        GridJobData data = new GridJobData(dataId, dataSize);
+        GridJobData data = new GridJobData(nodeId, dataId, dataSize);
         Downloads.put(nodeId+dataId,data);
     }
 
@@ -143,6 +143,14 @@ public class SimulationState extends StateBESA {
             }
         }
         return r;
+    }
+
+    public int getTotalJobs() {
+        return Jobs.size();
+    }
+
+    public int getTotalDownloads() {
+        return Downloads.size();
     }
 
     public MobilePhone getMobilePhoneById(int id) {

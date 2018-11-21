@@ -75,7 +75,7 @@ public class MobilePhone {
                 throw new Exception("There is no enough available Disk Space to allocate " + dataSize + " MB.");
             }
 
-            dataDownloaded = DataBuffers.getOrDefault("dataId",0.0f);
+            dataDownloaded = DataBuffers.getOrDefault(dataId,0.0f);
             if(dataDownloaded >= dataSize)
                 return true;
 
@@ -84,8 +84,10 @@ public class MobilePhone {
 
             NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk() - dataDownloaded);
             DataBuffers.put(dataId, dataDownloaded);
-            NodeFeatures.setState(NodeStateEnum.READY);
-            NodeFeatures.setRunningProcess("");
+            if(dataDownloaded >= dataSize) {
+                NodeFeatures.setState(NodeStateEnum.READY);
+                NodeFeatures.setRunningProcess("");
+            }
         }
         return (dataDownloaded >= dataSize);
     }
@@ -99,11 +101,10 @@ public class MobilePhone {
 
     public float eraseNextDataBuffer() {
         float bufferSize = 0;
-        for(Map.Entry<String, Float> buffer : DataBuffers.entrySet()) {
-            bufferSize = buffer.getValue();
-            DataBuffers.remove(buffer.getKey());
-            NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk()+bufferSize);
-        }
+        Map.Entry<String, Float> buffer  = DataBuffers.entrySet().iterator().next();
+        bufferSize = buffer.getValue();
+        DataBuffers.remove(buffer.getKey());
+        NodeFeatures.setAvailableDisk(NodeFeatures.getAvailableDisk()+bufferSize);
         return bufferSize;
     }
 
@@ -121,18 +122,16 @@ public class MobilePhone {
 
     public boolean installProgram(Program program) throws Exception {
         if(!Programs.containsKey(program.getName())) {
-            boolean installed = false;
 
             //Check if the file is already downloaded
             if(DataBuffers.containsKey(program.getName())) {
                 Programs.put(program.getName(), program);
-                installed = true;
+                return true;
             }
 
             try {
                 if(downloadData(program.getName(), program.getSize())) {
                     Programs.put(program.getName(), program);
-                    installed = true;
                     return true;
                 }else {
                     return false;
@@ -151,7 +150,7 @@ public class MobilePhone {
         if(NodeFeatures.getState() != NodeStateEnum.DISCONNECTED) {
             NodeFeatures.setState(NodeStateEnum.RUNNING_JOB);
             NodeFeatures.setRunningProcess(programId);
-
+            boolean finish = false;
             if (Programs.containsKey(programId)) {
                 for (String id : Programs.get(programId).getInputDataIds()) {
                     if (!DataBuffers.containsKey(id)) {
@@ -167,10 +166,13 @@ public class MobilePhone {
                     }
                 }
                 NodeFeatures.setBatteryLevel(NodeFeatures.getBatteryLevel() - (NodeFeatures.getBatteryDischargeRate() * Programs.get(programId).getTotalExecutionTime()));
-                return Programs.get(programId).execute();
+                finish =  Programs.get(programId).execute();
             }
-            NodeFeatures.setState(NodeStateEnum.READY);
-            NodeFeatures.setRunningProcess("");
+            if(finish) {
+                NodeFeatures.setState(NodeStateEnum.READY);
+                NodeFeatures.setRunningProcess("");
+            }
+            return finish;
         }
         return false;
     }

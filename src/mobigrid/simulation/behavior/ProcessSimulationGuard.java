@@ -26,39 +26,41 @@ public class ProcessSimulationGuard extends PeriodicGuardBESA {
         //Get the agent state
         SimulationState se = (SimulationState) this.getAgent().getState();
 
+        synchronized (se) {
+            AgHandlerBESA ah;
 
-        AgHandlerBESA ah;
+            ReportBESA.info("Descargas activas: " + se.getTotalDownloads() + " - Jobs en ejecucion: " + se.getTotalJobs());
+            se.processDownloads();
+            se.processJobs();
 
-        se.processDownloads();
-        se.processJobs();
-
-        GridJobData data = se.getNextDataDownloaded();
-        while(data != null) {
-            EventBESA event = new EventBESA(DataDownloadedGuard.class.getName(), data);
-            try {
-                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SUPERVISOR.toString());
-                ah.sendEvent(event);
-            }catch(ExceptionBESA ex) {
-                ReportBESA.error(ex);
+            GridJobData data = se.getNextDataDownloaded();
+            while (data != null) {
+                ReportBESA.info("Descarga de datos finalizada. DataId: " + data.getDataId());
+                EventBESA event = new EventBESA(DataDownloadedGuard.class.getName(), data);
+                try {
+                    ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SUPERVISOR.toString());
+                    ah.sendEvent(event);
+                } catch (ExceptionBESA ex) {
+                    ReportBESA.error(ex);
+                }
+                data = se.getNextDataDownloaded();
             }
-            data = se.getNextDataDownloaded();
-        }
 
-        AssignedJob job = se.getNextJobFinished();
-        while(job != null) {
-
-            //now we need no notify the dashboard than a new mobile node had been added
-            EventBESA event = new EventBESA(ExecuteProgramSimulatedGuard.class.getName(), job);
-            try {
-                //get the dashboard agent handler
-                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SIMULATION.toString());
-                //send to it the event
-                ah.sendEvent(event);
-            } catch (ExceptionBESA ex) {
-                ReportBESA.error(ex);
+            AssignedJob job = se.getNextJobFinished();
+            while (job != null) {
+                ReportBESA.info("Ejecucion de Job finalizado. JobId: " + job.getJobDescription().getName());
+                //now we need no notify the dashboard than a new mobile node had been added
+                EventBESA event = new EventBESA(ExecuteProgramSimulatedGuard.class.getName(), job);
+                try {
+                    //get the dashboard agent handler
+                    ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SIMULATION.toString());
+                    //send to it the event
+                    ah.sendEvent(event);
+                } catch (ExceptionBESA ex) {
+                    ReportBESA.error(ex);
+                }
+                job = se.getNextJobFinished();
             }
-            job = se.getNextJobFinished();
         }
-
     }
 }

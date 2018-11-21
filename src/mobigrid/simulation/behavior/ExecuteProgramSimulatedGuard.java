@@ -25,33 +25,35 @@ public class ExecuteProgramSimulatedGuard extends GuardBESA {
     public void funcExecGuard(EventBESA eventBESA) {
         SimulationState simulationState = (SimulationState) this.getAgent().getState();
 
-        AssignedJob assignedJob = (AssignedJob) eventBESA.getData();
+        synchronized (simulationState) {
+            AssignedJob assignedJob = (AssignedJob) eventBESA.getData();
 
-        AgHandlerBESA ah;
+            AgHandlerBESA ah;
 
-        //now we need no notify the dashboard than a new mobile node had been added
-        EventBESA event = new EventBESA(JobExecutedGuard.class.getName(), assignedJob.getJobDescription());
-        try {
-            //get the dashboard agent handler
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.EXECUTOR.toString()+assignedJob.getNodeId());
-            //send to it the event
-            ah.sendEvent(event);
-        } catch (ExceptionBESA ex) {
-            ReportBESA.error(ex);
-        }
+            //now we need no notify the dashboard than a new mobile node had been added
+            EventBESA event = new EventBESA(JobExecutedGuard.class.getName(), assignedJob.getJobDescription());
+            try {
+                //get the dashboard agent handler
+                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.EXECUTOR.toString());
+                //send to it the event
+                ah.sendEvent(event);
+            } catch (ExceptionBESA ex) {
+                ReportBESA.error(ex);
+            }
 
-        //Update Node Status in the dashboard
-        MobileNodeDescription node = simulationState.getMobileNodeStatus(assignedJob.getNodeId());
+            //Update Node Status in the dashboard
+            MobileNodeDescription node = simulationState.getMobileNodeStatus(assignedJob.getNodeId());
 
-        //now we need no notify the dashboard than a mobile node had been updated
-        EventBESA eventUpdate = new EventBESA(UpdateNodesStatusGuard.class.getName(), node);
-        try {
-            //get the dashboard agent handler
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DASHBOARD.toString());
-            //send to it the event
-            ah.sendEvent(eventUpdate);
-        } catch (ExceptionBESA ex) {
-            ReportBESA.error(ex);
+            //now we need no notify the dashboard than a mobile node had been updated
+            EventBESA eventUpdate = new EventBESA(UpdateNodesStatusGuard.class.getName(), node);
+            try {
+                //get the dashboard agent handler
+                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DASHBOARD.toString());
+                //send to it the event
+                ah.sendEvent(eventUpdate);
+            } catch (ExceptionBESA ex) {
+                ReportBESA.error(ex);
+            }
         }
     }
 }

@@ -26,24 +26,25 @@ public class DispatchJobsGuard extends PeriodicGuardBESA {
     public void funcPeriodicExecGuard(EventBESA eventBESA) {
         //Get the agent state
         DispatcherState dispatcherState = (DispatcherState) this.getAgent().getState();
-            AgHandlerBESA ah;
+        AgHandlerBESA ah;
+        ReportBESA.info("Procesando Cola del Dispatcher. Total Nodos: "+dispatcherState.getTotalNodes()+" - Total Jobs encolados: "+dispatcherState.getJobsQueueSize());
+        AssignedJob assignedJob = dispatcherState.dispatchNextJob();
+        if (assignedJob != null) {
 
-            AssignedJob assignedJob = dispatcherState.dispatchNextJob();
-            if (assignedJob != null) {
+            ReportBESA.info("Job "+assignedJob.getJobDescription().getName()+" asignado a Nodo: "+assignedJob.getNodeId());
+            EventBESA event = new EventBESA(DispatchJobGuard.class.getName(), assignedJob);
+            EventBESA eventStatus = new EventBESA(ReportJobStatusGuard.class.getName(), assignedJob);
+            try {
+                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SUPERVISOR.toString());
+                //send the event.
+                ah.sendEvent(event);
 
-                EventBESA event = new EventBESA(DispatchJobGuard.class.getName(), assignedJob.getJobDescription());
-                EventBESA eventStatus = new EventBESA(ReportJobStatusGuard.class.getName(), assignedJob);
-                try {
-                    ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SUPERVISOR.toString() + assignedJob.getNodeId());
-                    //send the event.
-                    ah.sendEvent(event);
-
-                    ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
-                    //send the event
-                    ah.sendEvent(eventStatus);
-                } catch (ExceptionBESA ex) {
-                    ReportBESA.error(ex);
-                }
+                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
+                //send the event
+                ah.sendEvent(eventStatus);
+            } catch (ExceptionBESA ex) {
+                ReportBESA.error(ex);
             }
+        }
     }
 }

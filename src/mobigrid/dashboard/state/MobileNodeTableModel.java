@@ -111,13 +111,15 @@ public class MobileNodeTableModel extends AbstractTableModel {
 
     public void updateNodeStatus(MobileNodeDescription node) {
         boolean found = false;
-        for (MobileNodeDescription n : Nodes) {
-            if(n.getId() == node.getId()) {
-                n = node;
-                found = true;
+        if(Nodes.size() > 0) {
+            for (MobileNodeDescription n : Nodes) {
+                if (n.getId() == node.getId()) {
+                    n = node;
+                    found = true;
+                }
             }
         }
-        if(!found)
+        if(Nodes.size() == 0 || !found)
             Nodes.add(node);
     }
 }

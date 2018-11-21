@@ -2,6 +2,7 @@ package mobigrid.dashboard.behavior;
 
 import BESA.Kernell.Agent.Event.EventBESA;
 import BESA.Kernell.Agent.GuardBESA;
+import BESA.Log.ReportBESA;
 import mobigrid.common.JobDescription;
 import mobigrid.common.MobileNodeDescription;
 import mobigrid.dashboard.state.SimulationDashboard;
@@ -20,11 +21,16 @@ public class UpdateNodesStatusGuard extends GuardBESA {
     @Override
     public void funcExecGuard(EventBESA eventBESA) {
 
+        ReportBESA.info("Actualizando informacion de nodo en Dasboard");
         //Get the agent state
         SimulationDashboard sd = (SimulationDashboard) this.getAgent().getState();
         //Get mobile node updated
         MobileNodeDescription node = (MobileNodeDescription) eventBESA.getData();
+
         //Update dashboard
-        sd.updateMobileNode(node);
+        if(node != null) {
+            sd.updateMobileNode(node);
+            ReportBESA.info("Nuevo estado de nodo: "+node.getId()+" - "+node.getState());
+        }
     }
 }

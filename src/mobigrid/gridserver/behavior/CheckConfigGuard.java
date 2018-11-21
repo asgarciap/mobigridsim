@@ -66,6 +66,7 @@ public class CheckConfigGuard extends PeriodicGuardBESA {
         if(as.getTotalNodes() >= 1) {
             //now check if it is time to send a new job the grid simulation
             for(JobDescription j : as.getNextJobsToAdd()) {
+                ReportBESA.info("Enviando nuevo Job al Dispatcher. JobId: "+j.getName());
                 //this is pretty much the same as the mobile node.
                 EventBESA event = new EventBESA(AddJobGuard.class.getName(), j);
                 try {

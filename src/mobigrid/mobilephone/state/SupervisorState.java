@@ -1,6 +1,7 @@
 package mobigrid.mobilephone.state;
 
 import BESA.Kernell.Agent.StateBESA;
+import mobigrid.common.AssignedJob;
 import mobigrid.common.GridJobStateEnum;
 import mobigrid.common.JobDescription;
 import mobigrid.common.MobileNodeDescription;
@@ -18,30 +19,28 @@ import java.util.Map;
 public class SupervisorState extends StateBESA {
 
     private List<String> DownloadingFilesList;
-    private List<JobDescription> JobList;
-    private int NodeId;
-
+    private List<AssignedJob> AssignedJobList;
+    private int CurrentDownloadingIndex;
+    private int CurrentAssignedIndex;
     public SupervisorState() {
         DownloadingFilesList = new ArrayList<>();
-        JobList = new ArrayList<>();
+        AssignedJobList = new ArrayList<>();
+        CurrentAssignedIndex = 0;
+        CurrentDownloadingIndex = 0;
     }
 
-    public int getNodeId() {
-        return NodeId;
+    public void addAssignedJob(AssignedJob assignedJob) {
+        assignedJob.getJobDescription().setState(GridJobStateEnum.QUEUED);
+        AssignedJobList.add(assignedJob);
     }
 
-    public void addJob(JobDescription job) {
-        job.setState(GridJobStateEnum.QUEUED);
-        JobList.add(job);
+    public void removeAssignedJob(AssignedJob job) {
+        AssignedJobList.remove(job);
     }
 
-    public void removeJob(JobDescription job) {
-        JobList.remove(job);
-    }
-
-    public JobDescription getJobByName(String name) {
-        for(JobDescription j : JobList) {
-            if(j.getName().equals(name))
+    public AssignedJob getAssignedJobByName(String name) {
+        for(AssignedJob j : AssignedJobList) {
+            if(j.getJobDescription().getName().equals(name))
                 return j;
         }
         return null;
@@ -55,32 +54,36 @@ public class SupervisorState extends StateBESA {
         DownloadingFilesList.remove(name);
     }
 
-    public JobDescription getNextQueuedJob() {
-        for(JobDescription j : JobList) {
-            if(j.getState() == GridJobStateEnum.QUEUED)
+    public AssignedJob getNextAssignedJob() {
+        AssignedJob j = null;
+        if(CurrentAssignedIndex < AssignedJobList.size()){
+            j = AssignedJobList.get(CurrentAssignedIndex);
+            CurrentAssignedIndex++;
+        }else {
+            CurrentAssignedIndex = 0;
+        }
+        return j;
+    }
+
+    public AssignedJob getNextDownloadingAssignedJob() {
+
+        for(AssignedJob j : AssignedJobList) {
+            if(j.getJobDescription().getState() == GridJobStateEnum.DOWNLOADING)
                 return j;
         }
         return null;
     }
 
-    public JobDescription getNextDownloadingJob() {
-        for(JobDescription j : JobList) {
-            if(j.getState() == GridJobStateEnum.DOWNLOADING)
+    public AssignedJob getNextFinishedAssignedJob() {
+        for(AssignedJob j : AssignedJobList) {
+            if(j.getJobDescription().getState() == GridJobStateEnum.FINISHED)
                 return j;
         }
         return null;
     }
 
-    public JobDescription getNextFinishedJob() {
-        for(JobDescription j : JobList) {
-            if(j.getState() == GridJobStateEnum.FINISHED)
-                return j;
-        }
-        return null;
-    }
-
-    public boolean isJobReadyToRun(JobDescription job) {
-        for(Map.Entry<String,Float> item : job.getInputFiles().entrySet()) {
+    public boolean isAssignedJobReadyToRun(AssignedJob job) {
+        for(Map.Entry<String,Float> item : job.getJobDescription().getInputFiles().entrySet()) {
             if(DownloadingFilesList.contains(item.getKey()))
                 return false;
         }

@@ -18,10 +18,9 @@ public class UnregisterNodeGuard extends GuardBESA {
         ReportBESA.info("Desregistrando nodo...");
         //Get the agent state
         DispatcherState dispatcherState = (DispatcherState) this.getAgent().getState();
-            AgHandlerBESA ah;
 
-            MobileNodeDescription mobileNodeDescription = (MobileNodeDescription) eventBESA.getData();
+        MobileNodeDescription mobileNodeDescription = (MobileNodeDescription) eventBESA.getData();
 
-            dispatcherState.unregisterMobileNode(mobileNodeDescription);
+        dispatcherState.unregisterMobileNode(mobileNodeDescription);
     }
 }

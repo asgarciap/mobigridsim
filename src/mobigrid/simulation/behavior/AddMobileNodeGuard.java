@@ -42,35 +42,36 @@ public class AddMobileNodeGuard extends GuardBESA {
         //Get the agent state
         SimulationState se = (SimulationState) this.getAgent().getState();
 
-        //Get MobileNode description
-        MobileNodeDescription node = (MobileNodeDescription) eventBESA.getData();
+        synchronized (se) {
+            //Get MobileNode description
+            MobileNodeDescription node = (MobileNodeDescription) eventBESA.getData();
 
-        //add it to the simulation
-        se.addMobileNode(node);
+            //add it to the simulation
+            se.addMobileNode(node);
 
-        AgHandlerBESA ah;
+            AgHandlerBESA ah;
 
-        //now we need no notify the dashboard than a new mobile node had been added
-        EventBESA event = new EventBESA(UpdateNodesStatusGuard.class.getName(), node);
-        try {
-            //get the dashboard agent handler
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DASHBOARD.toString());
-            //send to it the event
-            ah.sendEvent(event);
-        } catch (ExceptionBESA ex) {
-            ReportBESA.error(ex);
+            //now we need no notify the dashboard than a new mobile node had been added
+            EventBESA event = new EventBESA(UpdateNodesStatusGuard.class.getName(), node);
+            try {
+                //get the dashboard agent handler
+                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DASHBOARD.toString());
+                //send to it the event
+                ah.sendEvent(event);
+            } catch (ExceptionBESA ex) {
+                ReportBESA.error(ex);
+            }
+
+            //now we need no notify the dispatcher than a new mobile node had been added
+            EventBESA eventDispatcher = new EventBESA(RegisterNodeGuard.class.getName(), node);
+            try {
+                //get the dispatcher agent handler
+                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DISPATCHER.toString());
+                //send to it the event
+                ah.sendEvent(eventDispatcher);
+            } catch (ExceptionBESA ex) {
+                ReportBESA.error(ex);
+            }
         }
-
-        //now we need no notify the dispatcher than a new mobile node had been added
-        EventBESA eventDispatcher = new EventBESA(RegisterNodeGuard.class.getName(), node);
-        try {
-            //get the dispatcher agent handler
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DISPATCHER.toString());
-            //send to it the event
-            ah.sendEvent(eventDispatcher);
-        } catch (ExceptionBESA ex) {
-            ReportBESA.error(ex);
-        }
-
     }
 }

@@ -25,83 +25,68 @@ public class CheckJobsGuard extends PeriodicGuardBESA {
     public void funcPeriodicExecGuard(EventBESA eventBESA) {
         //Get the agent state
         SupervisorState ss = (SupervisorState) this.getAgent().getState();
+        ReportBESA.info("--------Verificando estado de Jobs y Descargas----------");
+        synchronized (ss) {
+            AgHandlerBESA ah;
+            //Iterates over all assigned jobs
+            AssignedJob assignedJob = ss.getNextAssignedJob();
+            while (assignedJob != null) {
+                //Check for files to download
+                if(assignedJob.getJobDescription().getState() == GridJobStateEnum.QUEUED) {
+                    for (Map.Entry<String, Float> item : assignedJob.getJobDescription().getInputFiles().entrySet()) {
+                        ss.addDownloadingFile(item.getKey());
+                        GridJobData d = new GridJobData(assignedJob.getNodeId(), item.getKey(), item.getValue());
+                        EventBESA event = new EventBESA(DownloadDataGuard.class.getName(), d);
+                        try {
+                            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DOWNLOADER.toString());
+                            //send the event.
+                            ah.sendEvent(event);
 
-        AgHandlerBESA ah;
+                            assignedJob.getJobDescription().setState(GridJobStateEnum.DOWNLOADING);
 
-        //Check for files to download
-        JobDescription queuedJob = ss.getNextQueuedJob();
-        while(queuedJob != null) {
-            for(Map.Entry<String,Float> item : queuedJob.getInputFiles().entrySet()) {
-                ss.addDownloadingFile(item.getKey());
-                GridJobData d = new GridJobData(item.getKey(), item.getValue());
-                d.setNodeId(ss.getNodeId());
-                EventBESA event = new EventBESA(DownloadDataGuard.class.getName(), d);
-                try {
-                    ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DOWNLOADER.toString()+ss.getNodeId());
-                    //send the event.
-                    ah.sendEvent(event);
+                            //send event to the main supervisor
+                            EventBESA eventSup = new EventBESA(ReportJobStatusGuard.class.getName(), assignedJob);
+                            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
+                            ah.sendEvent(eventSup);
+                        } catch (ExceptionBESA ex) {
+                            ReportBESA.error(ex);
+                        }
 
-                    queuedJob.setState(GridJobStateEnum.DOWNLOADING);
+                    }
+                //check if we have a job to run
+                }else if(assignedJob.getJobDescription().getState() == GridJobStateEnum.DOWNLOADING) {
+                    if (ss.isAssignedJobReadyToRun(assignedJob)) {
+                        assignedJob.getJobDescription().setState(GridJobStateEnum.READY);
+                        try {
+                            EventBESA event = new EventBESA(ExecuteJobGuard.class.getName(), assignedJob);
+                            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.EXECUTOR.toString());
 
-                    //send event to the main supervisor
-                    AssignedJob assignedJob = new AssignedJob(ss.getNodeId(),queuedJob);
-                    EventBESA eventSup = new EventBESA(ReportJobStatusGuard.class.getName(),assignedJob);
-                    ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
-                    ah.sendEvent(eventSup);
-                    assignedJob = null;
-                    eventSup = null;
-                }catch(ExceptionBESA ex) {
-                    ReportBESA.error(ex);
+                            //send the event
+                            ah.sendEvent(event);
+                            assignedJob.getJobDescription().setState(GridJobStateEnum.RUNNING);
+
+                            //send event to the main supervisor
+                            EventBESA eventSup = new EventBESA(ReportJobStatusGuard.class.getName(), assignedJob);
+                            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
+                            ah.sendEvent(eventSup);
+                        } catch (ExceptionBESA ex) {
+                            ReportBESA.error(ex);
+                        }
+                    }
+                //check for jobs finished
+                }else if(assignedJob.getJobDescription().getState() == GridJobStateEnum.FINISHED) {
+                    try {
+                        //Send Event to Main Supervisor to report than a new job has finished
+                        EventBESA eventSup = new EventBESA(ReportJobStatusGuard.class.getName(), assignedJob);
+                        ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
+                        ah.sendEvent(eventSup);
+                        ss.removeAssignedJob(assignedJob);
+                    } catch (ExceptionBESA ex) {
+                        ReportBESA.error(ex);
+                    }
                 }
-
+                assignedJob = ss.getNextAssignedJob();
             }
-            queuedJob = ss.getNextQueuedJob();
-        }
-
-        //Now, check if we have a job to run
-        JobDescription downloadingJob = ss.getNextDownloadingJob();
-        while(downloadingJob != null) {
-            if(ss.isJobReadyToRun(downloadingJob)) {
-                downloadingJob.setState(GridJobStateEnum.READY);
-                try {
-                    AssignedJob assignedJob = new AssignedJob(ss.getNodeId(),downloadingJob);
-
-                    EventBESA event = new EventBESA(ExecuteJobGuard.class.getName(), assignedJob);
-                    ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.EXECUTOR.toString()+ss.getNodeId());
-
-                    //send the event
-                    ah.sendEvent(event);
-                    downloadingJob.setState(GridJobStateEnum.RUNNING);
-
-                    //send event to the main supervisor
-                    EventBESA eventSup = new EventBESA(ReportJobStatusGuard.class.getName(),assignedJob);
-                    ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
-                    ah.sendEvent(eventSup);
-                    assignedJob = null;
-                    eventSup = null;
-                }catch (ExceptionBESA ex) {
-                    ReportBESA.error(ex);
-                }
-            }
-            downloadingJob = ss.getNextDownloadingJob();
-        }
-
-        //Finally check for jobs finished in order to report them to the Main Supervisor.
-        JobDescription finishedJob = ss.getNextFinishedJob();
-        while(finishedJob != null) {
-            try {
-                //Send Event to Main Supervisor to report than a new job has finished
-                AssignedJob assignedJob = new AssignedJob(ss.getNodeId(), finishedJob);
-                EventBESA eventSup = new EventBESA(ReportJobStatusGuard.class.getName(), assignedJob);
-                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
-                ah.sendEvent(eventSup);
-                ss.removeJob(finishedJob);
-                assignedJob = null;
-                eventSup = null;
-            }catch(ExceptionBESA ex) {
-                ReportBESA.error(ex);
-            }
-            finishedJob = ss.getNextFinishedJob();
         }
     }
 }

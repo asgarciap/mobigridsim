@@ -2,6 +2,7 @@ package mobigrid.mobilephone.behavior;
 
 import BESA.Kernell.Agent.Event.EventBESA;
 import BESA.Kernell.Agent.GuardBESA;
+import mobigrid.common.AssignedJob;
 import mobigrid.common.JobDescription;
 import mobigrid.mobilephone.state.SupervisorState;
 
@@ -17,10 +18,12 @@ public class DispatchJobGuard extends GuardBESA {
         //Get the agent state
         SupervisorState ss = (SupervisorState) this.getAgent().getState();
 
-        //Get Job description
-        JobDescription job = (JobDescription) eventBESA.getData();
+        synchronized (ss) {
+            //Get Job description
+            AssignedJob assignedJob = (AssignedJob) eventBESA.getData();
 
-        //add it to the simulation
-        ss.addJob(job);
+            //add it to the simulation
+            ss.addAssignedJob(assignedJob);
+        }
     }
 }

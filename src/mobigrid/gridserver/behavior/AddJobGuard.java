@@ -26,10 +26,11 @@ public class AddJobGuard extends GuardBESA {
     public void funcExecGuard(EventBESA eventBESA) {
         //Get the agent state
         DispatcherState dispatcherState = (DispatcherState) this.getAgent().getState();
-            AgHandlerBESA ah;
+        AgHandlerBESA ah;
 
-            JobDescription jobDescription = (JobDescription) eventBESA.getData();
+        JobDescription jobDescription = (JobDescription) eventBESA.getData();
 
-            dispatcherState.queueJob(jobDescription);
+        dispatcherState.queueJob(jobDescription);
+        ReportBESA.info("Nuevo Job agregado a la cola del dispatcher. Total Jobs en cola: "+dispatcherState.getJobsQueueSize());
     }
 }

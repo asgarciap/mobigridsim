@@ -9,10 +9,11 @@ public class GridJobData extends DataBESA {
     private int NodeId;
     private boolean Downloaded;
 
-    public GridJobData(String dataId, float dataSize) {
+    public GridJobData(int nodeId, String dataId, float dataSize) {
         DataId = dataId;
         DataSize = dataSize;
         Downloaded = false;
+        NodeId = nodeId;
     }
 
     public GridJobData(GridJobData data) {

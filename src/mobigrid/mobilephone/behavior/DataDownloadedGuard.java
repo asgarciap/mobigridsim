@@ -16,7 +16,9 @@ public class DataDownloadedGuard extends GuardBESA {
     public void funcExecGuard(EventBESA eventBESA) {
         //Get the agent state
         SupervisorState ss = (SupervisorState) this.getAgent().getState();
-        GridJobData d = (GridJobData) eventBESA.getData();
-        ss.removeDownloadingFile(d.getDataId());
+        synchronized (ss) {
+            GridJobData d = (GridJobData) eventBESA.getData();
+            ss.removeDownloadingFile(d.getDataId());
+        }
     }
 }

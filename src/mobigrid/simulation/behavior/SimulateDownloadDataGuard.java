@@ -22,25 +22,28 @@ public class SimulateDownloadDataGuard extends GuardBESA {
         //Get the agent state
         SimulationState se = (SimulationState) this.getAgent().getState();
 
-        //Get MobileNode description
-        GridJobData gridJobData = (GridJobData) eventBESA.getData();
+        synchronized (se) {
+            //Get MobileNode description
+            GridJobData gridJobData = (GridJobData) eventBESA.getData();
 
-        se.addDownload(gridJobData.getNodeId(), gridJobData.getDataId(), gridJobData.getDataSize());
+            ReportBESA.info("Agregando datos para descarga. DataId:" + gridJobData.getDataId());
+            se.addDownload(gridJobData.getNodeId(), gridJobData.getDataId(), gridJobData.getDataSize());
 
-        AgHandlerBESA ah;
+            AgHandlerBESA ah;
 
-        //Update Node Status in the dashboard
-        MobileNodeDescription node = se.getMobileNodeStatus(gridJobData.getNodeId());
+            //Update Node Status in the dashboard
+            MobileNodeDescription node = se.getMobileNodeStatus(gridJobData.getNodeId());
 
-        //now we need no notify the dashboard than a mobile node had been updated
-        EventBESA eventUpdate = new EventBESA(UpdateNodesStatusGuard.class.getName(), node);
-        try {
-            //get the dashboard agent handler
-            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DASHBOARD.toString());
-            //send to it the event
-            ah.sendEvent(eventUpdate);
-        } catch (ExceptionBESA ex) {
-            ReportBESA.error(ex);
+            //now we need no notify the dashboard than a mobile node had been updated
+            EventBESA eventUpdate = new EventBESA(UpdateNodesStatusGuard.class.getName(), node);
+            try {
+                //get the dashboard agent handler
+                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DASHBOARD.toString());
+                //send to it the event
+                ah.sendEvent(eventUpdate);
+            } catch (ExceptionBESA ex) {
+                ReportBESA.error(ex);
+            }
         }
     }
 }
