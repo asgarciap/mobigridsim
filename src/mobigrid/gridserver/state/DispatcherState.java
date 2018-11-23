@@ -1,10 +1,7 @@
 package mobigrid.gridserver.state;
 
 import BESA.Kernell.Agent.StateBESA;
-import mobigrid.common.AssignedJob;
-import mobigrid.common.GridJobStateEnum;
-import mobigrid.common.JobDescription;
-import mobigrid.common.MobileNodeDescription;
+import mobigrid.common.*;
 
 import java.util.*;
 
@@ -19,13 +16,25 @@ public class DispatcherState extends StateBESA {
 
     public enum DispatcherStrategy {
         ROUND_ROBIN,
-        SEAS,
+        SEAS
     };
+
+    private boolean CollaborationEnabled;
 
     public DispatcherState() {
         JobsQueue = new LinkedList<>();
         MobileNodes = new LinkedList<>();
         Strategy = DispatcherStrategy.ROUND_ROBIN;
+        CollaborationEnabled = false;
+    }
+
+    public void enableColaboration() {
+        CollaborationEnabled = true;
+        Strategy = DispatcherStrategy.SEAS;
+    }
+
+    public boolean isColaborationEnabled() {
+        return CollaborationEnabled;
     }
 
     public AssignedJob dispatchNextJob() {
@@ -33,15 +42,58 @@ public class DispatcherState extends StateBESA {
             //Round Robin Dispatcher
             if(Strategy == DispatcherStrategy.ROUND_ROBIN) {
                 MobileNodeDescription node = MobileNodes.remove();
+                AssignedJob assignedJob = null;
+                boolean finish = false;
                 JobDescription job = JobsQueue.remove();
-                job.setState(GridJobStateEnum.DISPATCHED);
-                AssignedJob assignedJob = new AssignedJob(node.getId(), job);
+                while(!finish) {
+                    if(node.getState() == NodeStateEnum.READY) {
+                        job.setState(GridJobStateEnum.DISPATCHED);
+                        assignedJob = new AssignedJob(node.getId(), job);
+                        //mode node to the last position of the queue
+                        MobileNodes.add(node);
+                        finish = true;
+                    }else {
+                        JobsQueue.add(job);
+                        if(node.getState() != NodeStateEnum.DISCONNECTED)
+                            MobileNodes.add(node);
 
-                //mode node to the last position of the queue
-                MobileNodes.add(node);
+                        if(MobileNodes.size() > 0)
+                            node = MobileNodes.remove();
+                        else
+                            finish = true;
+                    }
+                }
                 return assignedJob;
             }else if(Strategy == DispatcherStrategy.SEAS) {
-                //TODO
+                //Envio los trabajos a los nodos con mas carga
+                MobileNodeDescription node = MobileNodes.remove();
+                AssignedJob assignedJob = null;
+                MobileNodeDescription selected = null;
+                boolean finish = false;
+                int ix = 0;
+                JobDescription job = JobsQueue.remove();
+                while(!finish) {
+                    if (node.getState() == NodeStateEnum.READY) {
+                        if (selected == null || selected.getBatteryLevel() < node.getBatteryLevel())
+                            selected = node;
+                    }
+                    ix++;
+
+                    if(node.getState() != NodeStateEnum.DISCONNECTED)
+                        MobileNodes.add(node);
+
+                    if(ix < MobileNodes.size()) {
+                        node = MobileNodes.remove();
+                    }else {
+                        finish = true;
+                    }
+                }
+                if(selected != null) {
+                    assignedJob = new AssignedJob(selected.getId(), job);
+                }else {
+                    JobsQueue.add(job);
+                }
+                return assignedJob;
             }
         }
         return null;

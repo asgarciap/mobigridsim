@@ -8,8 +8,12 @@ import BESA.Log.ReportBESA;
 import mobigrid.common.*;
 import mobigrid.gridserver.behavior.AddJobGuard;
 import mobigrid.gridserver.state.AdministratorState;
+import mobigrid.mobilephone.behavior.DataDownloadAbortedGuard;
 import mobigrid.mobilephone.behavior.DataDownloadedGuard;
+import mobigrid.mobilephone.behavior.JobPausedGuard;
 import mobigrid.simulation.state.SimulationState;
+
+import java.util.List;
 
 /**
  * Periodic Guard to check simulator config and
@@ -29,7 +33,14 @@ public class ProcessSimulationGuard extends PeriodicGuardBESA {
         synchronized (se) {
             AgHandlerBESA ah;
 
-            ReportBESA.info("Descargas activas: " + se.getTotalDownloads() + " - Jobs en ejecucion: " + se.getTotalJobs());
+            ReportBESA.info("Total Nodos: "+se.getTotalPhones()+" - Descargas activas: " + se.getTotalDownloads() + " - Jobs en ejecucion: " + se.getTotalJobs());
+
+            ReportBESA.info("Eliminando Nodos desconectados y sus trabajos y descargas asociadas");
+            List<GridJobData> erasedDownloads = se.cleanOrphanDownloads();
+            List<AssignedJob> erasedJobs = se.cleanOrphanJobs();
+            int erasedNodes = se.cleanDisconnectedPhones();
+            ReportBESA.info("Descargas abortadas: "+erasedDownloads.size()+" - Jobs abortados: "+erasedJobs.size()+" - Nodos eliminados(desconectados): "+erasedNodes);
+
             se.processDownloads();
             se.processJobs();
 
@@ -60,6 +71,31 @@ public class ProcessSimulationGuard extends PeriodicGuardBESA {
                     ReportBESA.error(ex);
                 }
                 job = se.getNextJobFinished();
+            }
+
+            //Notifico al supervisor los jobs pausados para que sean reasignados
+            if(se.isColaborationEnabled()) {
+                ReportBESA.info("Notificando descargas no finalizadas para su reasignacion");
+                for(GridJobData gridJobData : erasedDownloads) {
+                    EventBESA event = new EventBESA(DataDownloadAbortedGuard.class.getName(), gridJobData);
+                    try {
+                        ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SUPERVISOR.toString());
+                        ah.sendEvent(event);
+                    } catch (ExceptionBESA ex) {
+                        ReportBESA.error(ex);
+                    }
+                }
+
+                ReportBESA.info("Notificando trabajos no finalizados para su reasignacion");
+                for(AssignedJob assignedJob : erasedJobs) {
+                    EventBESA event = new EventBESA(JobPausedGuard.class.getName(), assignedJob.getJobDescription());
+                    try {
+                        ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.SUPERVISOR.toString());
+                        ah.sendEvent(event);
+                    } catch (ExceptionBESA ex) {
+                        ReportBESA.error(ex);
+                    }
+                }
             }
         }
     }

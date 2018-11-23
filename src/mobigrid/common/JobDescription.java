@@ -1,6 +1,7 @@
 package mobigrid.common;
 
 import BESA.Kernell.Agent.Event.DataBESA;
+import com.sun.corba.se.spi.orbutil.threadpool.Work;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,8 +18,8 @@ public class JobDescription extends DataBESA {
     private float ProgramFileSize;
     private float RequiredRam;
     private float ComputationalTime;
-    private float StartTime;
-    private float FinishTime;
+    private float TotalComputationTime;
+    private float WorkComplete;
 
     public JobDescription(String name, float programFileSize, float requiredRam, float computationalTime) {
         Name = name;
@@ -27,6 +28,8 @@ public class JobDescription extends DataBESA {
         ComputationalTime = computationalTime;
         InputFilesSize = new HashMap<>();
         addInputFile(Name, ProgramFileSize);
+        WorkComplete = 0;
+        TotalComputationTime = 0;
     }
 
     public void addInputFile(String name, float size) {
@@ -71,5 +74,20 @@ public class JobDescription extends DataBESA {
 
     public Map<String, Float> getInputFiles() {
         return InputFilesSize;
+    }
+
+    public void setWorkComplete(float workComplete) {
+        WorkComplete = workComplete;
+    }
+
+    public float getWorkComplete() {
+        return WorkComplete;
+    }
+
+    public void updateComputationTime() {
+        TotalComputationTime++;
+        WorkComplete = (TotalComputationTime/ComputationalTime)*100;
+        if(WorkComplete > 100)
+            WorkComplete = 100f;
     }
 }

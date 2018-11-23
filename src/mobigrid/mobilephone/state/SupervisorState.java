@@ -54,6 +54,10 @@ public class SupervisorState extends StateBESA {
         DownloadingFilesList.remove(name);
     }
 
+    public int getTotalDownloadingFiles() {
+        return DownloadingFilesList.size();
+    }
+
     public AssignedJob getNextAssignedJob() {
         AssignedJob j = null;
         if(CurrentAssignedIndex < AssignedJobList.size()){
@@ -83,6 +87,10 @@ public class SupervisorState extends StateBESA {
     }
 
     public boolean isAssignedJobReadyToRun(AssignedJob job) {
+
+        if(job.getJobDescription().getWorkComplete() > 0)
+            return true; //hack
+
         for(Map.Entry<String,Float> item : job.getJobDescription().getInputFiles().entrySet()) {
             if(DownloadingFilesList.contains(item.getKey()))
                 return false;

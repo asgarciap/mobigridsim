@@ -51,7 +51,6 @@ public class CheckJobsGuard extends PeriodicGuardBESA {
                         } catch (ExceptionBESA ex) {
                             ReportBESA.error(ex);
                         }
-
                     }
                 //check if we have a job to run
                 }else if(assignedJob.getJobDescription().getState() == GridJobStateEnum.DOWNLOADING) {
@@ -66,27 +65,42 @@ public class CheckJobsGuard extends PeriodicGuardBESA {
                             assignedJob.getJobDescription().setState(GridJobStateEnum.RUNNING);
 
                             //send event to the main supervisor
-                            EventBESA eventSup = new EventBESA(ReportJobStatusGuard.class.getName(), assignedJob);
-                            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
-                            ah.sendEvent(eventSup);
+                            this.reportAssignedJobSupervisor(assignedJob);
                         } catch (ExceptionBESA ex) {
                             ReportBESA.error(ex);
                         }
+                    } else if(assignedJob.isTimedOut()){
+                        assignedJob.getJobDescription().setState(GridJobStateEnum.DISCARDED);
+                        this.reportAssignedJobSupervisor(assignedJob);
+                        ss.removeAssignedJob(assignedJob);
+                    } else {
+                        ReportBESA.info("Esperando por descarga de datos del Job: "+assignedJob.getJobDescription().getName()+" en el Nodo:"+assignedJob.getNodeId()+ " Descargas Activas: "+ss.getTotalDownloadingFiles());
                     }
                 //check for jobs finished
                 }else if(assignedJob.getJobDescription().getState() == GridJobStateEnum.FINISHED) {
-                    try {
-                        //Send Event to Main Supervisor to report than a new job has finished
-                        EventBESA eventSup = new EventBESA(ReportJobStatusGuard.class.getName(), assignedJob);
-                        ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
-                        ah.sendEvent(eventSup);
-                        ss.removeAssignedJob(assignedJob);
-                    } catch (ExceptionBESA ex) {
-                        ReportBESA.error(ex);
-                    }
+                    this.reportAssignedJobSupervisor(assignedJob);
+                    ss.removeAssignedJob(assignedJob);
+                } else if(assignedJob.getJobDescription().getState() == GridJobStateEnum.RUNNING && assignedJob.isTimedOut()) {
+                    assignedJob.getJobDescription().setState(GridJobStateEnum.DISCARDED);
+                    this.reportAssignedJobSupervisor(assignedJob);
+                    ss.removeAssignedJob(assignedJob);
+                }else {
+                    ;//ReportBESA.error("Job Assignado con estado no procesable. NodoId: "+assignedJob.getNodeId()+" - Job: "+assignedJob.getJobDescription().getName()+" - Estado: "+assignedJob.getJobDescription().getState());
                 }
                 assignedJob = ss.getNextAssignedJob();
             }
+        }
+    }
+
+    public void reportAssignedJobSupervisor(AssignedJob assignedJob) {
+        AgHandlerBESA ah;
+        try {
+            //Send Event to Main Supervisor to report aborted job
+            EventBESA eventSup = new EventBESA(ReportJobStatusGuard.class.getName(), assignedJob);
+            ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.MAIN_SUPERVISOR.toString());
+            ah.sendEvent(eventSup);
+        } catch (ExceptionBESA ex) {
+            ReportBESA.error(ex);
         }
     }
 }

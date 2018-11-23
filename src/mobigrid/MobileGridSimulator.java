@@ -44,14 +44,16 @@ public class MobileGridSimulator {
 	
     public static void main(String[] args) {
 
+        //MODIFICAR SOLO ACA PARA AGREGAR COOPERACION!!!!!!
+        boolean COOPERATION_ENABLED = true;
+
         AdmBESA admLocal = AdmBESA.getInstance();
 
         //Simulation Agent
         SimulationState ss = new SimulationState();
         StructBESA simStruct = new StructBESA();
-        simStruct.addBehavior("AddMobileBehaviorSim");
-        simStruct.addBehavior("RemoveMobileBehaviorSim");
-        simStruct.addBehavior("SimulateDownloadBehavior");
+        simStruct.addBehavior("AddRemoveMobileBehaviorSim");
+        simStruct.addBehavior("SimulateExecuteDownloadPauseBehavior");
         simStruct.addBehavior("SimulateExecuteProgramBehavior");
         simStruct.addBehavior("ProcessSimulationBehavior");
 
@@ -78,15 +80,20 @@ public class MobileGridSimulator {
         dispatcherStruct.addBehavior("DispatcherDispatchJobsBehavior");
 
         try {
-            simStruct.bindGuard("AddMobileBehaviorSim", AddMobileNodeGuard.class);
-            simStruct.bindGuard("RemoveMobileBehaviorSim", RemoveMobileNodeGuard.class);
-            simStruct.bindGuard("SimulateDownloadBehavior", SimulateDownloadDataGuard.class);
-            simStruct.bindGuard("SimulateDownloadBehavior", DownloadDataSimulatedGuard.class);
-            simStruct.bindGuard("SimulateExecuteProgramBehavior", SimulateExecuteProgramGuard.class);
-            simStruct.bindGuard("SimulateExecuteProgramBehavior", ExecuteProgramSimulatedGuard.class);
+            simStruct.bindGuard("AddRemoveMobileBehaviorSim", AddMobileNodeGuard.class);
+            simStruct.bindGuard("AddRemoveMobileBehaviorSim", RemoveMobileNodeGuard.class);
+            simStruct.bindGuard("SimulateExecuteDownloadPauseBehavior", SimulateDownloadDataGuard.class);
+            simStruct.bindGuard("SimulateExecuteDownloadPauseBehavior", DownloadDataSimulatedGuard.class);
+            simStruct.bindGuard("SimulateExecuteDownloadPauseBehavior", SimulateExecuteProgramGuard.class);
+            simStruct.bindGuard("SimulateExecuteDownloadPauseBehavior", ExecuteProgramSimulatedGuard.class);
             simStruct.bindGuard("ProcessSimulationBehavior", ProcessSimulationGuard.class);
             SimulationAgent simAgent = new SimulationAgent(AgentNames.SIMULATION.toString(), ss, simStruct, 0.91);
             simAgent.start();
+
+            if(COOPERATION_ENABLED) {
+                ss.enableColaboration();
+                dispatcherState.enableColaboration();
+            }
 
             PeriodicDataBESA dataProc = new PeriodicDataBESA(1000, 100, PeriodicGuardBESA.START_PERIODIC_CALL);
             EventBESA processEvent = new EventBESA(ProcessSimulationGuard.class.getName(), dataProc);
@@ -130,9 +137,9 @@ public class MobileGridSimulator {
             SupervisorState supervisorState = new SupervisorState();
             StructBESA supStruct = new StructBESA();
             supStruct.addBehavior("SupervisorBehavior");
-            supStruct.addBehavior("SupervisorDownloaderBehavior");
-            supStruct.addBehavior("SupervisorExecutorBehavior");
-            supStruct.addBehavior("SupervisorCheckJobsBehavior");
+            //supStruct.addBehavior("SupervisorDownloaderBehavior");
+            //supStruct.addBehavior("SupervisorExecutorBehavior");
+            //supStruct.addBehavior("SupervisorCheckJobsBehavior");
 
             StructBESA processStruct = new StructBESA();
             processStruct.addBehavior("ProcessSimulationBehavior");
@@ -152,9 +159,14 @@ public class MobileGridSimulator {
 
                 //Supervisor Agent
                 supStruct.bindGuard("SupervisorBehavior", DispatchJobGuard.class);
-                supStruct.bindGuard("SupervisorDownloaderBehavior", DataDownloadedGuard.class);
+                /*supStruct.bindGuard("SupervisorDownloaderBehavior", DataDownloadedGuard.class);
                 supStruct.bindGuard("SupervisorExecutorBehavior", JobExecutedGuard.class);
-                supStruct.bindGuard("SupervisorCheckJobsBehavior", CheckJobsGuard.class);
+                supStruct.bindGuard("SupervisorCheckJobsBehavior", CheckJobsGuard.class);*/
+                supStruct.bindGuard("SupervisorBehavior", DataDownloadedGuard.class);
+                supStruct.bindGuard("SupervisorBehavior", JobExecutedGuard.class);
+                supStruct.bindGuard("SupervisorBehavior", JobPausedGuard.class);
+                supStruct.bindGuard("SupervisorBehavior", DataDownloadAbortedGuard.class);
+                supStruct.bindGuard("SupervisorBehavior", CheckJobsGuard.class);
                 SupervisorAgent supervisorAgent = new SupervisorAgent(AgentNames.SUPERVISOR.toString(), supervisorState, supStruct, 0.91);
                 supervisorAgent.start();
 

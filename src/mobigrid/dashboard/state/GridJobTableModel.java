@@ -24,7 +24,7 @@ public class GridJobTableModel extends AbstractTableModel {
     }
 
     public int getColumnCount() {
-        return 5;
+        return 6;
     }
 
     public String getColumnName(int column) {
@@ -44,6 +44,9 @@ public class GridJobTableModel extends AbstractTableModel {
                 break;
             case 4:
                 name = "Computational Time (secs)";
+                break;
+            case 5:
+                name = "Work Complete (%)";
                 break;
         }
         return name;
@@ -80,6 +83,9 @@ public class GridJobTableModel extends AbstractTableModel {
                 break;
             case 4:
                 value = job.getComputationalTime();
+                break;
+            case 5:
+                value = job.getWorkComplete();
                 break;
         }
         return value;

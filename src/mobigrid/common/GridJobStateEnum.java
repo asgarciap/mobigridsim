@@ -7,5 +7,6 @@ public enum GridJobStateEnum {
     READY, //job ready to run
     RUNNING, //job running
     DISCARDED, //job discarded
-    FINISHED // job finished
+    FINISHED, // job finished
+    PAUSED
 }

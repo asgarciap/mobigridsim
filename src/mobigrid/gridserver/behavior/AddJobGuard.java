@@ -26,7 +26,6 @@ public class AddJobGuard extends GuardBESA {
     public void funcExecGuard(EventBESA eventBESA) {
         //Get the agent state
         DispatcherState dispatcherState = (DispatcherState) this.getAgent().getState();
-        AgHandlerBESA ah;
 
         JobDescription jobDescription = (JobDescription) eventBESA.getData();
 

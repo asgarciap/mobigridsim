@@ -24,10 +24,21 @@ public class SimulationState extends StateBESA {
     private Map<Integer, MobilePhone> MobilePhones;
     private Map<String, GridJobData> Downloads;
     private Map<String, AssignedJob> Jobs;
+    private boolean CollaborationEnabled;
+
     public SimulationState() {
         MobilePhones = new HashMap<>();
         Downloads = new HashMap<>();
         Jobs = new HashMap<>();
+        CollaborationEnabled = false;
+    }
+
+    public void enableColaboration() {
+        CollaborationEnabled = true;
+    }
+
+    public boolean isColaborationEnabled() {
+        return CollaborationEnabled;
     }
 
     public void addMobileNode(MobileNodeDescription nodeDescription) {
@@ -77,8 +88,10 @@ public class SimulationState extends StateBESA {
             }
 
             try {
-                if(phone.installProgram(program))
+                if(phone.installProgram(program)) {
+                    jobDescription.updateComputationTime();
                     return phone.executeProgram(program.getName());
+                }
             } catch (Exception ex) {
                 ReportBESA.error(ex);
                 return false;
@@ -95,6 +108,59 @@ public class SimulationState extends StateBESA {
                 }
             }
         }
+    }
+
+    public List<AssignedJob> cleanOrphanJobs() {
+        //remove jobs that can be finished due to phone disconnection
+        int removed = 0;
+        List<AssignedJob> tmp = new ArrayList<>();
+        for (Map.Entry<String, AssignedJob> jobs : Jobs.entrySet()) {
+            MobilePhone phone = getMobilePhoneById(jobs.getValue().getNodeId());
+            if(phone == null || phone.getCurrentStatus().getState() == NodeStateEnum.DISCONNECTED) {
+                tmp.add(jobs.getValue());
+                removed++;
+            }
+        }
+
+        if(removed > 0) {
+            for (AssignedJob j : tmp) {
+                Jobs.remove(j.getNodeId() + j.getJobDescription().getName());
+            }
+        }
+        return tmp;
+    }
+
+    public List<GridJobData> cleanOrphanDownloads() {
+        //remove jobs that can be finished due to phone disconnection
+        int removed = 0;
+        List<GridJobData> tmp = new ArrayList<>();
+        for (Map.Entry<String, GridJobData> data : Downloads.entrySet()) {
+            MobilePhone phone = getMobilePhoneById(data.getValue().getNodeId());
+            if(phone == null || phone.getCurrentStatus().getState() == NodeStateEnum.DISCONNECTED) {
+                tmp.add(data.getValue());
+                removed++;
+            }
+        }
+        if(removed > 0) {
+            for(GridJobData d : tmp) {
+                Downloads.remove(d.getNodeId()+d.getDataId());
+            }
+        }
+        return tmp;
+    }
+
+    public int cleanDisconnectedPhones() {
+        List<Integer> toRemove = new ArrayList<>();
+        for (Map.Entry<Integer, MobilePhone> phones : MobilePhones.entrySet()) {
+            if (phones.getValue().getState() == NodeStateEnum.DISCONNECTED)
+                toRemove.add(phones.getKey());
+        }
+        int removed = 0;
+        for(Integer id: toRemove) {
+            MobilePhones.remove(id);
+            removed++;
+        }
+        return removed;
     }
 
     public GridJobData getNextDataDownloaded() {
@@ -151,6 +217,10 @@ public class SimulationState extends StateBESA {
 
     public int getTotalDownloads() {
         return Downloads.size();
+    }
+
+    public int getTotalPhones() {
+        return MobilePhones.size();
     }
 
     public MobilePhone getMobilePhoneById(int id) {

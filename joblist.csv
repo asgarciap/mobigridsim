@@ -3,14 +3,14 @@
 # Params are as follow:
 # JobId, Program File Size (MB), Required RAM (MB), Computational Time (seconds), InitSimulationTime (Seconds)
 Job1,100,500,3600,10
-Job2,200,200,300,10
+Job2,200,200,120,10
 Job3,400,100,720,5
 Job4,100,80,1000,10
 Job5,200,100,500,11
 Job6,220,200,5,10
 Job7,110,200,1800,12
 Job8,200,400,50,12
-Job9,150,500,1800,12
+Job9,150,500,120,12
 Job10,340,200,7200,12
 Job11,340,400,7200,11
 Job12,230,300,100,10

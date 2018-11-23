@@ -88,6 +88,11 @@ public class MobilePhone {
                 NodeFeatures.setState(NodeStateEnum.READY);
                 NodeFeatures.setRunningProcess("");
             }
+            //if battery got exhausted
+            if(NodeFeatures.getBatteryLevel() <= 0) {
+                NodeFeatures.setState(NodeStateEnum.DISCONNECTED);
+                NodeFeatures.setBatteryLevel(0);
+            }
         }
         return (dataDownloaded >= dataSize);
     }
@@ -172,6 +177,12 @@ public class MobilePhone {
                 NodeFeatures.setState(NodeStateEnum.READY);
                 NodeFeatures.setRunningProcess("");
             }
+
+            if(NodeFeatures.getBatteryLevel() <= 0) {
+                NodeFeatures.setState(NodeStateEnum.DISCONNECTED);
+                NodeFeatures.setBatteryLevel(0);
+            }
+
             return finish;
         }
         return false;
