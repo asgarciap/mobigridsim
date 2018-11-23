@@ -2,30 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="56f4de9a-237f-4c2d-9dd3-9ab0602c2cc5" name="Default" comment="Fixes in Agents regarding simulation and the dashboard report.&#10;Now the simulator is fully functional, jobs and nodes are inserted to the simulation and reported in the dashboard.&#10;The jobs added runs in the mobile nodes which in turn update its intern features to report its new state after download and/or execute a job.">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/nodelist.csv" afterPath="$PROJECT_DIR$/nodelist.csv" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/common/GridJobData.java" afterPath="$PROJECT_DIR$/src/mobigrid/common/GridJobData.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/dashboard/behavior/UpdateNodesStatusGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/dashboard/behavior/UpdateNodesStatusGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/dashboard/state/MobileNodeTableModel.java" afterPath="$PROJECT_DIR$/src/mobigrid/dashboard/state/MobileNodeTableModel.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/gridserver/behavior/AddJobGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/gridserver/behavior/AddJobGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/gridserver/behavior/CheckConfigGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/gridserver/behavior/CheckConfigGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/gridserver/behavior/DispatchJobsGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/gridserver/behavior/DispatchJobsGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/gridserver/behavior/UnregisterNodeGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/gridserver/behavior/UnregisterNodeGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/gridserver/state/DispatcherState.java" afterPath="$PROJECT_DIR$/src/mobigrid/gridserver/state/DispatcherState.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/mobilephone/behavior/CheckJobsGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/mobilephone/behavior/CheckJobsGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/mobilephone/behavior/DataDownloadedGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/mobilephone/behavior/DataDownloadedGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/mobilephone/behavior/DispatchJobGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/mobilephone/behavior/DispatchJobGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/mobilephone/behavior/JobExecutedGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/mobilephone/behavior/JobExecutedGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/mobilephone/state/SupervisorState.java" afterPath="$PROJECT_DIR$/src/mobigrid/mobilephone/state/SupervisorState.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/AddMobileNodeGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/AddMobileNodeGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/DownloadDataSimulatedGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/DownloadDataSimulatedGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/ExecuteProgramSimulatedGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/ExecuteProgramSimulatedGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/ProcessSimulationGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/ProcessSimulationGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/RemoveMobileNodeGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/RemoveMobileNodeGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/SimulateDownloadDataGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/SimulateDownloadDataGuard.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/SimulateExecuteProgramGuard.java" afterPath="$PROJECT_DIR$/src/mobigrid/simulation/behavior/SimulateExecuteProgramGuard.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/simulation/state/MobilePhone.java" afterPath="$PROJECT_DIR$/src/mobigrid/simulation/state/MobilePhone.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/mobigrid/simulation/state/SimulationState.java" afterPath="$PROJECT_DIR$/src/mobigrid/simulation/state/SimulationState.java" />
     </list>
     <ignored path="$PROJECT_DIR$/bin/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -143,8 +120,8 @@
       <file leaf-file-name="MobilePhone.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/mobigrid/simulation/state/MobilePhone.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="201">
-              <caret line="107" column="8" lean-forward="false" selection-start-line="107" selection-start-column="8" selection-end-line="107" selection-end-column="8" />
+            <state relative-caret-position="99">
+              <caret line="101" column="40" lean-forward="true" selection-start-line="101" selection-start-column="40" selection-end-line="101" selection-end-column="40" />
               <folding />
             </state>
           </provider>
@@ -592,7 +569,7 @@
       <workItem from="1540695439572" duration="23537000" />
       <workItem from="1540864857711" duration="27314000" />
       <workItem from="1542327568475" duration="7762000" />
-      <workItem from="1542476813957" duration="49939000" />
+      <workItem from="1542476813957" duration="51356000" />
     </task>
     <task id="LOCAL-00001" summary="Mobile Grid Simulator first commit.&#10;Added project structure and initial version of classes:&#10;- Agents&#10;- Behaviors&#10;- States&#10;This project requires the BESA library, used to develop multiagent systems.">
       <created>1540774182198</created>
@@ -619,11 +596,10 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="186242000" />
+    <option name="totallyTimeSpent" value="187659000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="22" y="20" width="1366" height="732" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -633,7 +609,7 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.2768" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2768" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
@@ -1109,8 +1085,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/mobigrid/simulation/state/MobilePhone.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="201">
-          <caret line="107" column="8" lean-forward="false" selection-start-line="107" selection-start-column="8" selection-end-line="107" selection-end-column="8" />
+        <state relative-caret-position="99">
+          <caret line="101" column="40" lean-forward="true" selection-start-line="101" selection-start-column="40" selection-end-line="101" selection-end-column="40" />
           <folding />
         </state>
       </provider>

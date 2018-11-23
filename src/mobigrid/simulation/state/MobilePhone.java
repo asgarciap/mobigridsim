@@ -100,7 +100,7 @@ public class MobilePhone {
     }
 
     public float eraseNextDataBuffer() {
-        float bufferSize = 0;
+        float bufferSize;
         Map.Entry<String, Float> buffer  = DataBuffers.entrySet().iterator().next();
         bufferSize = buffer.getValue();
         DataBuffers.remove(buffer.getKey());
