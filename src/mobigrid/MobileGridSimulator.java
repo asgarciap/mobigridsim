@@ -45,7 +45,7 @@ public class MobileGridSimulator {
     public static void main(String[] args) {
 
         //MODIFICAR SOLO ACA PARA AGREGAR COOPERACION!!!!!!
-        boolean COOPERATION_ENABLED = true;
+        boolean COOPERATION_ENABLED = false;
 
         AdmBESA admLocal = AdmBESA.getInstance();
 
@@ -95,7 +95,7 @@ public class MobileGridSimulator {
                 dispatcherState.enableColaboration();
             }
 
-            PeriodicDataBESA dataProc = new PeriodicDataBESA(1000, 100, PeriodicGuardBESA.START_PERIODIC_CALL);
+            PeriodicDataBESA dataProc = new PeriodicDataBESA(10, 10, PeriodicGuardBESA.START_PERIODIC_CALL);
             EventBESA processEvent = new EventBESA(ProcessSimulationGuard.class.getName(), dataProc);
             AgHandlerBESA ah = admLocal.getHandlerByAlias(AgentNames.SIMULATION.toString());
             ah.sendEvent(processEvent);
@@ -116,12 +116,13 @@ public class MobileGridSimulator {
             dispatcherStruct.bindGuard("DispatcherJobBehavior", AddJobGuard.class);
             dispatcherStruct.bindGuard("DispatcherNodeBehavior", RegisterNodeGuard.class);
             dispatcherStruct.bindGuard("DispatcherNodeBehavior", UnregisterNodeGuard.class);
+            //dispatcherStruct.bindGuard("DispatcherNodeBehavior", UpdateStatusNodeGuard.class);
             dispatcherStruct.bindGuard("DispatcherDispatchJobsBehavior", DispatchJobsGuard.class);
             DispatcherAgent dispatcherAgent = new DispatcherAgent(AgentNames.DISPATCHER.toString(), dispatcherState, dispatcherStruct, 0.91);
             dispatcherAgent.start();
 
             //Now sends a periodic event to check configuration every 1 seconds
-            PeriodicDataBESA data = new PeriodicDataBESA(1000, 100, PeriodicGuardBESA.START_PERIODIC_CALL);
+            PeriodicDataBESA data = new PeriodicDataBESA(10, 10, PeriodicGuardBESA.START_PERIODIC_CALL);
             EventBESA checkConfigEvent = new EventBESA(CheckConfigGuard.class.getName(), data);
             ah = admLocal.getHandlerByAlias(AgentNames.ADMINISTRATOR.toString());
             ah.sendEvent(checkConfigEvent);
@@ -171,7 +172,7 @@ public class MobileGridSimulator {
                 supervisorAgent.start();
 
                 //Now, start a periodic event in the supervisor agent.
-                PeriodicDataBESA dataPer = new PeriodicDataBESA(1000, 100, PeriodicGuardBESA.START_PERIODIC_CALL);
+                PeriodicDataBESA dataPer = new PeriodicDataBESA(10, 10, PeriodicGuardBESA.START_PERIODIC_CALL);
                 EventBESA checkJobsEvent = new EventBESA(CheckJobsGuard.class.getName(), dataPer);
                 ah = admLocal.getHandlerByAlias(AgentNames.SUPERVISOR.toString());
                 ah.sendEvent(checkJobsEvent);
@@ -180,7 +181,7 @@ public class MobileGridSimulator {
             }
 
             //Send another periodic event to check if we need to dispatch jobs in the dispatcher
-            PeriodicDataBESA dataDispatch = new PeriodicDataBESA(1000, 100, PeriodicGuardBESA.START_PERIODIC_CALL);
+            PeriodicDataBESA dataDispatch = new PeriodicDataBESA(10, 10, PeriodicGuardBESA.START_PERIODIC_CALL);
             EventBESA dispatchJobsEvent = new EventBESA(DispatchJobsGuard.class.getName(), dataDispatch);
             AgHandlerBESA ahd = admLocal.getHandlerByAlias(AgentNames.DISPATCHER.toString());
             ahd.sendEvent(dispatchJobsEvent);

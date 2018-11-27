@@ -15,8 +15,8 @@ public class RegisterNodeGuard extends GuardBESA {
 
     @Override
     public void funcExecGuard(EventBESA eventBESA) {
-        //Get the agent state
-        DispatcherState dispatcherState = (DispatcherState) this.getAgent().getState();
+            //Get the agent state
+            DispatcherState dispatcherState = (DispatcherState) this.getAgent().getState();
             AgHandlerBESA ah;
 
             MobileNodeDescription mobileNodeDescription = (MobileNodeDescription) eventBESA.getData();

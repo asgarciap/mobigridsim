@@ -114,6 +114,22 @@ public class DispatcherState extends StateBESA {
         }
     }
 
+    public void updateMobileNodeStatus(MobileNodeDescription mobileNodeDescription) {
+        if(MobileNodes.size() > 0) {
+            int queueSize = MobileNodes.size();
+            for(int i=0; i<queueSize; i++) {
+                MobileNodeDescription node = MobileNodes.remove();
+                if(node.getId() == mobileNodeDescription.getId()) {
+                    node.setBatteryLevel(mobileNodeDescription.getBatteryLevel());
+                    node.setState(mobileNodeDescription.getState());
+                    node.setAvailableDisk(mobileNodeDescription.getAvailableDisk());
+                    node.setAvailableRam(mobileNodeDescription.getAvailableRam());
+                    MobileNodes.add(node);
+                }
+            }
+        }
+    }
+
     public void queueJob(JobDescription jobDescription) {
         JobsQueue.add(jobDescription);
     }

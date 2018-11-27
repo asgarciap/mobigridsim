@@ -10,6 +10,7 @@ import mobigrid.common.AssignedJob;
 import mobigrid.common.JobDescription;
 import mobigrid.common.MobileNodeDescription;
 import mobigrid.dashboard.behavior.UpdateNodesStatusGuard;
+import mobigrid.gridserver.behavior.UpdateStatusNodeGuard;
 import mobigrid.simulation.state.SimulationState;
 
 /**
@@ -40,6 +41,10 @@ public class SimulateExecuteProgramGuard extends GuardBESA {
                 ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DASHBOARD.toString());
                 //send to it the event
                 ah.sendEvent(eventUpdate);
+
+                EventBESA eventUpdateDispatcher = new EventBESA(UpdateStatusNodeGuard.class.getName(), node);
+                ah = getAgent().getAdmLocal().getHandlerByAlias(AgentNames.DISPATCHER.toString());
+                ah.sendEvent(eventUpdateDispatcher);
             } catch (ExceptionBESA ex) {
                 ReportBESA.error(ex);
             }
